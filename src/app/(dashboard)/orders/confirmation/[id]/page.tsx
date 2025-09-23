@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth/auth-context'
 import { Button } from '@/components/ui/button'
-import { formatPrice, formatDate } from '@/lib/utils/format'
+import { formatPrice, formatDate, formatPriceBreakdown } from '@/lib/utils/format'
 import { OrderWithItems } from '@/lib/types/order'
 
 interface OrderConfirmationPageProps {
@@ -261,34 +261,39 @@ export default function OrderConfirmationPage({ params }: OrderConfirmationPageP
             Productos del Pedido
           </h3>
           
-                     <div className="space-y-4 mb-6">
-             {order.items.map((item: any, index: number) => (
+          <div className="space-y-4 mb-6">
+            {order.items.map((item: any, index: number) => (
               <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div className="flex-1">
                   <h4 className="font-semibold text-gray-900">{item.product_name}</h4>
                   <p className="text-sm text-gray-600">Código: {item.product_code}</p>
-                                     <p className="text-sm text-gray-500">
-                     {formatPrice(item.unit_price_with_iva)} × {item.quantity}
-                   </p>
-                 </div>
-                 <div className="text-right">
-                   <p className="font-bold text-lg">
-                     {formatPrice(item.line_total)}
-                   </p>
+                  <p className="text-sm text-gray-500">Cantidad: {item.quantity}</p>
                 </div>
               </div>
             ))}
+          </div>          {/* Totales */}
+          <div className="border-t pt-4">
+            {(() => {
+              const breakdown = formatPriceBreakdown(order.total_amount, 21)
+              return (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">Subtotal:</span>
+                    <span className="text-gray-900">{breakdown.subtotal}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">IVA (21%):</span>
+                    <span className="text-gray-900">{breakdown.iva}</span>
+                  </div>
+                  <hr className="border-gray-200" />
+                  <div className="flex justify-between items-center text-lg font-bold">
+                    <span>Total:</span>
+                    <span className="text-orange-600">{breakdown.total}</span>
+                  </div>
+                </div>
+              )
+            })()}
           </div>
-
-          {/* Totales */}
-                     <div className="border-t pt-4">
-             <div className="space-y-2 text-sm">
-               <div className="flex justify-between text-lg font-bold">
-                 <span>Total:</span>
-                 <span className="text-orange-600">{formatPrice(order.total_amount)}</span>
-               </div>
-             </div>
-           </div>
         </div>
 
         {/* Acciones */}

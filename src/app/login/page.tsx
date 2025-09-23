@@ -119,7 +119,12 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-6 text-center space-y-4">
+            <div>
+              <Link href="/forgot-password" className="text-orange-600 hover:text-orange-700 font-semibold">
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
             <p className="text-gray-600">
               ¿No tienes cuenta?{' '}
               <Link href="/register" className="text-orange-600 hover:text-orange-700 font-semibold">
@@ -158,21 +163,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="mt-6 bg-gray-50 rounded-lg p-4">
-            <h3 className="font-semibold text-gray-900 mb-2">Cuentas de prueba:</h3>
-            <div className="space-y-2 text-sm">
-              <div>
-                <strong>Administrador:</strong>
-                <br />
-                <span className="text-gray-600">admin@oestepan.com / admin123</span>
-              </div>
-              <div>
-                <strong>Cliente:</strong>
-                <br />
-                <span className="text-gray-600">panaderia.central@gmail.com / cliente123</span>
-              </div>
-            </div>
-          </div>
+         
         </div>
 
         <div className="text-center space-y-2">

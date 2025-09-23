@@ -69,6 +69,15 @@ export default function OrdersPage() {
       }
 
       const data: OrderListResponse = await response.json()
+      console.log('📦 Datos de pedidos recibidos:', data)
+      console.log('📦 Primer pedido completo:', data.orders[0])
+      if (data.orders[0]?.items) {
+        console.log('📦 Items del primer pedido:', data.orders[0].items)
+        console.log('📦 Cantidad de items:', data.orders[0].items.length)
+      } else {
+        console.log('⚠️ El primer pedido NO tiene items o items es undefined')
+        console.log('📦 Estructura del primer pedido:', Object.keys(data.orders[0] || {}))
+      }
       setOrders(data.orders)
       setTotalPages(data.totalPages)
     } catch (err) {
@@ -270,7 +279,7 @@ export default function OrdersPage() {
                           {formatPrice(order.total_amount)}
                         </div>
                         <p className="text-sm text-gray-500">
-                          {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
+                          {order.items?.length || 0} {(order.items?.length || 0) === 1 ? 'producto' : 'productos'}
                         </p>
                       </div>
                     </div>
@@ -278,14 +287,14 @@ export default function OrdersPage() {
                     {/* Productos del pedido (resumen) */}
                     <div className="mb-4">
                       <div className="flex flex-wrap gap-2">
-                        {order.items.slice(0, 3).map((item, index) => (
+                        {(order.items || []).slice(0, 3).map((item, index) => (
                           <span key={index} className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-orange-100 text-orange-700">
                             {item.product_name} x{item.quantity}
                           </span>
                         ))}
-                        {order.items.length > 3 && (
+                        {(order.items?.length || 0) > 3 && (
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-600">
-                            +{order.items.length - 3} más
+                            +{(order.items?.length || 0) - 3} más
                           </span>
                         )}
                       </div>
@@ -325,19 +334,6 @@ export default function OrdersPage() {
                             Ver Detalles
                           </Button>
                         </Link>
-                        {order.status === 'pending' && (
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="border-red-300 text-red-600 hover:bg-red-50"
-                            onClick={() => {
-                              // TODO: Implementar cancelación
-                              alert('Función de cancelación próximamente')
-                            }}
-                          >
-                            Cancelar
-                          </Button>
-                        )}
                       </div>
                     </div>
                   </div>

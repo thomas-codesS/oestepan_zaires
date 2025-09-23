@@ -213,9 +213,9 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                     <span className="capitalize">{product.category}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Stock disponible:</span>
-                    <span className={product.stock_quantity > 0 ? 'text-green-700' : 'text-red-700'}>
-                      {product.stock_quantity > 0 ? `${product.stock_quantity} unidades` : 'Sin stock'}
+                    <span>Estado:</span>
+                    <span className="text-green-700">
+                      Disponible
                     </span>
                   </div>
                 </div>
@@ -269,16 +269,9 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               <div className="space-y-4">
                 <Button 
                   onClick={handleAddToCart}
-                  disabled={product.stock_quantity === 0}
-                  className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 text-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 text-lg font-semibold"
                 >
-                  {product.stock_quantity > 0 ? (
-                    <>
-                      🛒 Agregar al Carrito - {formatPrice(priceWithIVA)}
-                    </>
-                  ) : (
-                    'Sin Stock Disponible'
-                  )}
+                  🛒 Agregar al Carrito - {formatPrice(priceWithIVA)}
                 </Button>
                 
                 <div className="text-center">

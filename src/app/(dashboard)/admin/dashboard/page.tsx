@@ -49,7 +49,7 @@ interface RecentOrder {
   id: string
   order_number: string
   user_email: string
-  total: number
+  total_amount: number
   status: string
   created_at: string
   items_count: number
@@ -440,7 +440,7 @@ export default function AdminDashboardPage() {
                     <p className="text-xs text-gray-400">{formatDate(order.created_at)} • {order.items_count} items</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-gray-900">{formatPrice(order.total)}</p>
+                    <p className="font-bold text-gray-900">{formatPrice(order.total_amount)}</p>
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                       {getStatusIcon(order.status)}
                       <span className="ml-1">{getStatusLabel(order.status)}</span>

@@ -4,6 +4,7 @@ export interface UserProfile {
   full_name?: string
   role: 'cliente' | 'admin'
   company_name?: string
+  razon_social?: string
   delivery_days: number[] // [1,3] para lunes/miércoles
   is_active: boolean
   created_at: string
@@ -27,12 +28,14 @@ export interface SignUpCredentials {
   password: string
   full_name: string
   company_name?: string
+  razon_social?: string
   delivery_days?: number[]
 }
 
 export interface UpdateProfileData {
   full_name?: string
   company_name?: string
+  razon_social?: string
   delivery_days?: number[]
 }
 

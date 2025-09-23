@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       // Ingresos totales
       supabase
         .from('orders')
-        .select('total')
+        .select('total_amount')
         .neq('status', 'cancelled'),
       
       // Pedidos pendientes
@@ -108,14 +108,14 @@ export async function GET(request: NextRequest) {
       // Ingresos de este mes
       supabase
         .from('orders')
-        .select('total')
+        .select('total_amount')
         .gte('created_at', startOfMonth.toISOString())
         .neq('status', 'cancelled'),
       
       // Ingresos del mes pasado
       supabase
         .from('orders')
-        .select('total')
+        .select('total_amount')
         .gte('created_at', startOfLastMonth.toISOString())
         .lte('created_at', endOfLastMonth.toISOString())
         .neq('status', 'cancelled')
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
 
     // Calcular totales y crecimientos
     const totalOrders = totalOrdersResult.count || 0
-    const totalRevenue = totalRevenueResult.data?.reduce((sum, order) => sum + (order.total || 0), 0) || 0
+    const totalRevenue = totalRevenueResult.data?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
     const pendingOrders = pendingOrdersResult.count || 0
     const completedOrders = completedOrdersResult.count || 0
     const totalProducts = totalProductsResult.count || 0
@@ -137,8 +137,8 @@ export async function GET(request: NextRequest) {
       ? ((thisWeekOrders - lastWeekOrders) / lastWeekOrders) * 100 
       : thisWeekOrders > 0 ? 100 : 0
 
-    const thisMonthRevenue = thisMonthRevenueResult.data?.reduce((sum, order) => sum + (order.total || 0), 0) || 0
-    const lastMonthRevenue = lastMonthRevenueResult.data?.reduce((sum, order) => sum + (order.total || 0), 0) || 0
+    const thisMonthRevenue = thisMonthRevenueResult.data?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
+    const lastMonthRevenue = lastMonthRevenueResult.data?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0
     const monthlyGrowth = lastMonthRevenue > 0 
       ? ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 
       : thisMonthRevenue > 0 ? 100 : 0

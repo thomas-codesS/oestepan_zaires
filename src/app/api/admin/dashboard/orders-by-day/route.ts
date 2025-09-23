@@ -45,56 +45,113 @@ export async function GET(request: NextRequest) {
     const startDate = searchParams.get('startDate') || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
     const endDate = searchParams.get('endDate') || new Date().toISOString().split('T')[0]
 
-    // Usar función helper para obtener pedidos agrupados por día
-    const { data: ordersData, error: ordersError } = await supabase
-      .rpc('get_orders_by_day', {
-        start_date: startDate,
-        end_date: endDate,
-        admin_user_id: user.id
-      })
+    // Obtener todos los pedidos
+    const { data: allOrders, error: allOrdersError } = await supabase
+      .from('orders')
+      .select('*')
+      .gte('delivery_date', startDate)
+      .lte('delivery_date', endDate)
+      .neq('status', 'cancelled')
+      .order('delivery_date', { ascending: false })
+      .order('created_at', { ascending: false })
 
-    if (ordersError) {
-      console.error('Error fetching orders:', ordersError)
+    if (allOrdersError) {
+      console.error('Error fetching all orders:', allOrdersError)
       return NextResponse.json({ error: 'Error al obtener pedidos' }, { status: 500 })
     }
 
-    // Transformar los datos para incluir items_count en cada pedido
-    const ordersGrouped = await Promise.all(
-      (ordersData || []).map(async (group: any) => {
-        // Procesar cada pedido para obtener el conteo de items
-        const ordersWithItems = await Promise.all(
-          group.orders.map(async (order: any) => {
-            const { data: items } = await supabase
-              .from('order_items')
-              .select('id')
-              .eq('order_id', order.id)
+    // Obtener perfiles de usuarios y agregar conteo de items
+    const ordersWithItems = await Promise.all(
+      (allOrders || []).map(async (order: any) => {
+        // Obtener perfil del usuario
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id, email, full_name, company_name')
+          .eq('id', order.user_id)
+          .single()
 
-            return {
-              ...order,
-              items_count: items?.length || 0
-            }
-          })
-        )
+        // Obtener conteo de items
+        const { data: items } = await supabase
+          .from('order_items')
+          .select('id')
+          .eq('order_id', order.id)
 
         return {
-          delivery_date: group.delivery_date,
-          client_email: group.client_email,
-          client_name: group.client_name,
-          delivery_address: group.delivery_address,
-          phone: group.phone,
-          order_count: group.order_count,
-          total_amount: parseFloat(group.total_amount || 0),
-          orders: ordersWithItems
+          ...order,
+          items_count: items?.length || 0,
+          client_name: profile?.full_name || profile?.email || 'Cliente Desconocido',
+          client_email: profile?.email || ''
         }
       })
     )
 
+    // Agrupar por fecha primero, luego por cliente
+    const groupedByDay: { [key: string]: any } = {}
+    
+    ordersWithItems.forEach((order: any) => {
+      const dateKey = order.delivery_date
+      
+      if (!groupedByDay[dateKey]) {
+        groupedByDay[dateKey] = {
+          delivery_date: dateKey,
+          total_amount: 0,
+          total_orders: 0,
+          clients: {} as { [key: string]: any }
+        }
+      }
+      
+      const clientKey = order.client_email
+      
+      if (!groupedByDay[dateKey].clients[clientKey]) {
+        groupedByDay[dateKey].clients[clientKey] = {
+          client_name: order.client_name,
+          client_email: order.client_email,
+          delivery_address: order.delivery_address,
+          phone: order.phone,
+          orders: [],
+          order_count: 0,
+          total_amount: 0
+        }
+      }
+      
+      // Agregar pedido al cliente
+      groupedByDay[dateKey].clients[clientKey].orders.push({
+        id: order.id,
+        status: order.status,
+        created_at: order.created_at,
+        items_count: order.items_count,
+        notes: order.notes,
+        total_amount: parseFloat(order.total_amount || 0)
+      })
+      
+      groupedByDay[dateKey].clients[clientKey].order_count++
+      groupedByDay[dateKey].clients[clientKey].total_amount += parseFloat(order.total_amount || 0)
+      
+      // Actualizar totales del día
+      groupedByDay[dateKey].total_orders++
+      groupedByDay[dateKey].total_amount += parseFloat(order.total_amount || 0)
+    })
+
+    // Convertir a array y ordenar
+    const ordersGrouped = Object.values(groupedByDay).map((day: any) => ({
+      ...day,
+      clients: Object.values(day.clients).sort((a: any, b: any) => 
+        a.client_name.localeCompare(b.client_name)
+      )
+    })).sort((a: any, b: any) => 
+      new Date(b.delivery_date).getTime() - new Date(a.delivery_date).getTime()
+    )
+
     // Estadísticas resumidas
     const stats = {
-      total_groups: ordersGrouped.length,
-      total_orders: ordersGrouped.reduce((sum, group) => sum + group.order_count, 0),
-      total_amount: ordersGrouped.reduce((sum, group) => sum + group.total_amount, 0),
-      unique_clients: new Set(ordersGrouped.map(group => group.client_email)).size,
+      total_days: ordersGrouped.length,
+      total_orders: ordersGrouped.reduce((sum, day) => sum + day.total_orders, 0),
+      total_amount: ordersGrouped.reduce((sum, day) => sum + day.total_amount, 0),
+      unique_clients: new Set(
+        ordersGrouped.flatMap(day => 
+          day.clients.map((client: any) => client.client_email)
+        )
+      ).size,
       date_range: { startDate, endDate }
     }
 

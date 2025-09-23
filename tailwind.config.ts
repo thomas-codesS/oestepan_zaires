@@ -23,6 +23,20 @@ const config: Config = {
         error: designTokens.colors.semantic.error,
         info: designTokens.colors.semantic.info,
         
+        // Colores de panadería - tonos cálidos
+        cream: {
+          50: '#fefdf9',
+          100: '#fdf8ed',
+          200: '#faf0d2',
+          300: '#f5e6b8',
+          400: '#f0d999',
+          500: '#ebcc7a',
+          600: '#d4b56e',
+          700: '#b8985b',
+          800: '#9c7b48',
+          900: '#7f5e35',
+        },
+        
         // Extender colores por defecto de Tailwind manteniendo compatibilidad
         orange: designTokens.colors.primary,
         gray: designTokens.colors.neutral,

@@ -157,7 +157,7 @@ export default function CatalogPage() {
   }
 
   // Agregar producto al carrito
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = (product: Product, quantity: number = 1) => {
     const priceWithIVA = calculatePriceWithIVA(product.price, product.iva_rate)
     
     const cartProduct = {
@@ -171,7 +171,7 @@ export default function CatalogPage() {
       code: product.code
     }
     
-    addItem(cartProduct, 1)
+    addItem(cartProduct, quantity)
   }
 
   if (error) {
@@ -362,7 +362,9 @@ export default function CatalogPage() {
                   <h3 className="text-2xl font-bold text-gray-900 mb-4">
                     No encontramos productos
                   </h3>
-                  <p className="text-gray-600 mb-8 text-lg">
+                  <p clas
+                  cls
+                  sName="text-gray-600 mb-8 text-lg">
                     Intenta ajustar tus filtros o busca algo diferente
                   </p>
                   <Button 
@@ -374,86 +376,92 @@ export default function CatalogPage() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products?.products?.map((product) => {
-                  const priceWithIVA = calculatePriceWithIVA(product.price, product.iva_rate)
-                  
-                  return (
-                    <div key={product.id} className="group bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-orange-100 overflow-hidden">
-                      {/* Imagen del producto */}
-                      <div className="aspect-square bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center relative overflow-hidden">
-                        <span className="text-6xl group-hover:scale-110 transition-transform duration-300">
-                          {getCategoryEmoji(product.category)}
-                        </span>
-                        <div className="absolute top-3 right-3">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-white bg-opacity-90 text-orange-700">
-                            {product.category}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="p-6">
-                        {/* Nombre y descripción */}
-                        <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">
-                          {product.name}
-                        </h3>
-                        
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                          {product.description}
-                        </p>
-                        
-                        {/* Precio */}
-                        <div className="mb-6">
-                          <div className="flex items-baseline space-x-2">
-                            <span className="text-2xl font-bold text-gray-900">
-                              {formatPrice(priceWithIVA)}
-                            </span>
-                            <span className="text-sm text-gray-500">
-                              (IVA inc.)
-                            </span>
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            Sin IVA: {formatPrice(product.price)}
-                          </div>
-                        </div>
-                        
-                        {/* Stock */}
-                        <div className="mb-4">
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                            product.stock_quantity > 10 
-                              ? 'bg-green-100 text-green-700'
-                              : product.stock_quantity > 0
-                              ? 'bg-yellow-100 text-yellow-700'
-                              : 'bg-red-100 text-red-700'
-                          }`}>
-                            {product.stock_quantity > 0 ? `${product.stock_quantity} disponibles` : 'Sin stock'}
-                          </span>
-                        </div>
-                        
-                        {/* Botones */}
+              <div className="bg-white rounded-xl shadow-lg border border-orange-100 overflow-hidden">
+                {/* Header de la lista */}
+                <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-6 py-4 border-b border-orange-100">
+                  <h3 className="text-lg font-semibold text-gray-900">Productos Disponibles</h3>
+                  <p className="text-sm text-gray-600">{products?.total || 0} productos encontrados</p>
+                </div>
+
+                {/* Lista de productos */}
+                <div className="divide-y divide-gray-100">
+                  {products?.products?.map((product) => {
+                    const priceWithIVA = calculatePriceWithIVA(product.price, product.iva_rate)
+                    
+                    return (
+                      <div key={product.id} className="p-6 hover:bg-gray-50 transition-colors">
                         <div className="flex items-center justify-between">
-                          <Link href={`/catalog/${product.id}`}>
+                          {/* Info del producto */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center space-x-3 mb-2">
+                              <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-orange-100 text-orange-700">
+                                {product.category}
+                              </span>
+                              <span className="text-xs text-gray-500">#{product.code}</span>
+                            </div>
+                            
+                            <h4 className="text-lg font-semibold text-gray-900 mb-1">
+                              {product.name}
+                            </h4>
+                            
+                            {product.description && (
+                              <p className="text-sm text-gray-600 mb-2 line-clamp-1">
+                                {product.description}
+                              </p>
+                            )}
+                            
+                            <div className="flex items-center space-x-4 text-sm">
+                              <span className="font-semibold text-gray-900">
+                                {formatPrice(priceWithIVA)}
+                              </span>
+                              <span className="text-gray-500">
+                                IVA {product.iva_rate}% incl.
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Controles de cantidad y agregar */}
+                          <div className="flex items-center space-x-3 ml-4">
+                            <div className="flex items-center space-x-2">
+                              <label htmlFor={`qty-${product.id}`} className="text-sm text-gray-600">
+                                Cant:
+                              </label>
+                              <input
+                                id={`qty-${product.id}`}
+                                type="number"
+                                min="1"
+                                defaultValue="1"
+                                className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:border-orange-400 focus:ring-1 focus:ring-orange-400"
+                              />
+                            </div>
+                            
                             <Button 
-                              variant="outline" 
                               size="sm"
-                              className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                              onClick={() => {
+                                const input = document.getElementById(`qty-${product.id}`) as HTMLInputElement
+                                const quantity = parseInt(input?.value || '1')
+                                handleAddToCart(product, quantity)
+                              }}
+                              className="bg-orange-600 hover:bg-orange-700 text-white px-6"
                             >
-                              Ver Detalles
+                              + Agregar
                             </Button>
-                          </Link>
-                          <Button 
-                            size="sm"
-                            onClick={() => handleAddToCart(product)}
-                            disabled={product.stock_quantity === 0}
-                            className="bg-orange-600 hover:bg-orange-700 text-white disabled:bg-gray-300"
-                          >
-                            {product.stock_quantity > 0 ? 'Agregar' : 'Sin Stock'}
-                          </Button>
+                            
+                            <Link href={`/catalog/${product.id}`}>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                              >
+                                Ver
+                              </Button>
+                            </Link>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
+                    )
+                  })}
+                </div>
               </div>
             )}
 

@@ -31,10 +31,10 @@ export function ProductForm({ product, onSubmit, isLoading = false, onCancel }: 
       price: product.price,
       iva_rate: product.iva_rate,
       category: product.category || '',
-      stock_quantity: product.stock_quantity
+      stock_quantity: 0 // Siempre 0 para desactivar stock
     } : {
       iva_rate: 21.0, // Valor por defecto
-      stock_quantity: 0
+      stock_quantity: 0 // Siempre 0 para desactivar stock
     }
   })
 
@@ -113,16 +113,6 @@ export function ProductForm({ product, onSubmit, isLoading = false, onCancel }: 
           placeholder="Seleccionar categoría"
           error={errors.category?.message}
           {...register('category')}
-        />
-
-        {/* Stock */}
-        <Input
-          label="Cantidad en Stock"
-          type="number"
-          min="0"
-          placeholder="0"
-          error={errors.stock_quantity?.message}
-          {...register('stock_quantity', { valueAsNumber: true })}
         />
       </div>
 

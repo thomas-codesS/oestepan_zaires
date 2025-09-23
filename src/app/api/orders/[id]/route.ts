@@ -74,10 +74,40 @@ export async function GET(
       )
     }
 
+    // Verificar si los items se obtuvieron correctamente
+    let orderItems = data.order_items || [];
+    
+    // Si no hay items en la consulta automática, obtenerlos manualmente
+    if (!orderItems || orderItems.length === 0) {
+      console.log(`🔍 Obteniendo items manualmente para pedido ${id}`);
+      const { data: manualItems, error: manualError } = await supabase
+        .from('order_items')
+        .select(`
+          id,
+          product_id,
+          product_code,
+          product_name,
+          quantity,
+          unit_price,
+          unit_price_with_iva,
+          iva_rate,
+          line_total,
+          created_at
+        `)
+        .eq('order_id', id);
+      
+      if (!manualError && manualItems) {
+        orderItems = manualItems;
+        console.log(`✅ Encontrados ${manualItems.length} items manualmente para pedido ${id}`);
+      } else if (manualError) {
+        console.error(`❌ Error obteniendo items manualmente para pedido ${id}:`, manualError);
+      }
+    }
+
     // Si es admin, obtener información del usuario del pedido
     let orderWithUser: OrderWithItems = {
       ...data,
-      items: data.order_items || []
+      items: orderItems
     }
 
     if (isAdmin) {

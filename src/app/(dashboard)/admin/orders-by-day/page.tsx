@@ -18,28 +18,34 @@ import {
   Filter,
   Search,
   Download,
-  Eye
+  Eye,
+  X
 } from 'lucide-react'
 
 interface OrdersByDayItem {
   delivery_date: string
-  client_email: string
-  client_name: string
-  delivery_address: string | null
-  phone: string | null
-  order_count: number
   total_amount: number
-  orders: Array<{
-    id: string
-    status: string
-    created_at: string
-    items_count: number
-    notes: string | null
+  total_orders: number
+  clients: Array<{
+    client_name: string
+    client_email: string
+    delivery_address: string | null
+    phone: string | null
+    order_count: number
+    total_amount: number
+    orders: Array<{
+      id: string
+      status: string
+      created_at: string
+      items_count: number
+      notes: string | null
+      total_amount: number
+    }>
   }>
 }
 
 interface OrdersByDayStats {
-  total_groups: number
+  total_days: number
   total_orders: number
   total_amount: number
   unique_clients: number
@@ -54,6 +60,11 @@ export default function OrdersByDayPage() {
   const [stats, setStats] = useState<OrdersByDayStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // Estados para el resumen de productos
+  const [showingSummary, setShowingSummary] = useState<string | null>(null)
+  const [productsSummary, setProductsSummary] = useState<any[]>([])
+  const [summaryLoading, setSummaryLoading] = useState(false)
   
   // Filtros - Rango más amplio para incluir pedidos futuros
   const [startDate, setStartDate] = useState(
@@ -104,6 +115,28 @@ export default function OrdersByDayPage() {
     }
   }
 
+  // Cargar resumen de productos por fecha
+  const loadProductsSummary = async (date: string) => {
+    try {
+      setSummaryLoading(true)
+      const response = await fetch(`/api/admin/dashboard/products-summary?date=${date}`)
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Error al cargar resumen de productos')
+      }
+
+      const data = await response.json()
+      setProductsSummary(data.products || [])
+      setShowingSummary(date)
+    } catch (err) {
+      console.error('Error loading products summary:', err)
+      alert(err instanceof Error ? err.message : 'Error al cargar resumen de productos')
+    } finally {
+      setSummaryLoading(false)
+    }
+  }
+
   // Manejar cambio de estado de pedido
   const handleStatusChange = async (orderId: string, newStatus: string) => {
     try {
@@ -141,11 +174,21 @@ export default function OrdersByDayPage() {
   }, [user, profile, startDate, endDate])
 
   // Filtrar por término de búsqueda
-  const filteredOrders = ordersByDay.filter(item => 
-    item.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.client_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (item.delivery_address && item.delivery_address.toLowerCase().includes(searchTerm.toLowerCase()))
-  )
+  const filteredOrders = ordersByDay.filter(day => 
+    day.clients.some(client =>
+      client.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.client_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (client.delivery_address && client.delivery_address.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+  ).map(day => ({
+    ...day,
+    clients: day.clients.filter(client =>
+      searchTerm === '' ||
+      client.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.client_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (client.delivery_address && client.delivery_address.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+  }))
 
   // Obtener status badge
   const getStatusBadge = (status: string) => {
@@ -272,8 +315,8 @@ export default function OrdersByDayPage() {
             <div className="bg-white rounded-xl shadow-lg p-6 border border-orange-100">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Grupos de Entrega</p>
-                  <p className="text-2xl font-bold text-gray-900">{stats.total_groups}</p>
+                  <p className="text-sm font-medium text-gray-600">Días con Pedidos</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.total_days}</p>
                 </div>
                 <div className="h-12 w-12 bg-orange-100 rounded-full flex items-center justify-center">
                   <Calendar className="h-6 w-6 text-orange-600" />
@@ -326,105 +369,190 @@ export default function OrdersByDayPage() {
           </div>
         )}
 
-        <div className="space-y-6">
-          {filteredOrders.map((group, index) => (
-            <div key={`${group.delivery_date}-${group.client_email}-${index}`} className="bg-white rounded-xl shadow-lg border border-orange-100">
-              {/* Header del Grupo */}
-              <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-6 py-4 rounded-t-xl border-b border-orange-100">
+        <div className="space-y-8">
+          {filteredOrders.map((day, dayIndex) => (
+            <div key={`${day.delivery_date}-${dayIndex}`} className="bg-white rounded-xl shadow-lg border border-orange-100">
+              {/* Header del Día - Naranja */}
+              <div className="bg-gradient-to-r from-orange-600 to-orange-700 px-6 py-4 rounded-t-xl text-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
-                      <Calendar className="h-5 w-5 text-orange-600" />
-                      <span className="text-lg font-bold text-gray-900">
-                        {formatDate(group.delivery_date)}
+                      <Calendar className="h-6 w-6 text-white" />
+                      <span className="text-xl font-bold">
+                        📅 {formatDate(day.delivery_date)}
                       </span>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <User className="h-4 w-4 text-gray-500" />
-                      <span className="font-semibold text-gray-900">{group.client_name}</span>
-                      <span className="text-sm text-gray-500">({group.client_email})</span>
                     </div>
                   </div>
 
                   <div className="flex items-center space-x-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => loadProductsSummary(day.delivery_date)}
+                      className="border-white text-white bg-transparent hover:bg-white hover:text-orange-600"
+                    >
+                      <Package className="h-4 w-4 mr-2" />
+                      Ver Resumen Productos
+                    </Button>
                     <div className="text-right">
-                      <p className="text-sm text-gray-500">{group.order_count} pedido(s)</p>
-                      <p className="text-lg font-bold text-gray-900">{formatPrice(group.total_amount)}</p>
+                      <p className="text-sm opacity-90">{day.clients.length} cliente(s) • {day.total_orders} pedido(s)</p>
+                      <p className="text-xl font-bold">Total del día: {formatPrice(day.total_amount)}</p>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Información de contacto y dirección */}
-                <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                  {group.delivery_address && (
-                    <div className="flex items-center space-x-1">
-                      <MapPin className="h-4 w-4" />
-                      <span>{group.delivery_address}</span>
+              {/* Resumen de Productos (si está activo para esta fecha) */}
+              {showingSummary === day.delivery_date && (
+                <div className="px-6 py-4 bg-blue-50 border-b border-blue-100">
+                  <div className="flex items-center justify-between mb-4">
+                    <h4 className="text-lg font-semibold text-gray-900 flex items-center">
+                      <Package className="h-5 w-5 text-blue-600 mr-2" />
+                      Resumen Total de Productos - {formatDate(day.delivery_date)}
+                    </h4>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowingSummary(null)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {summaryLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                      <span className="ml-3 text-gray-600">Cargando resumen...</span>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {productsSummary.map((product) => (
+                        <div key={product.product_id} className="bg-white rounded-lg p-4 border border-blue-200">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <h5 className="font-medium text-gray-900">{product.product_name}</h5>
+                              <p className="text-sm text-gray-500">Código: {product.product_code}</p>
+                              <p className="text-sm text-gray-600">{formatPrice(product.price)} c/u</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-blue-600">{product.total_quantity}</p>
+                              <p className="text-xs text-gray-500">unidades</p>
+                            </div>
+                          </div>
+                          <div className="mt-3 pt-3 border-t border-gray-100">
+                            <p className="text-sm text-gray-600">
+                              Total: <span className="font-semibold">{formatPrice(product.price * product.total_quantity)}</span>
+                            </p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
-                  
-                  {group.phone && (
-                    <div className="flex items-center space-x-1">
-                      <Phone className="h-4 w-4" />
-                      <span>{group.phone}</span>
+
+                  {!summaryLoading && productsSummary.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      No hay productos en pedidos para esta fecha.
                     </div>
                   )}
                 </div>
-              </div>
+              )}
 
-              {/* Lista de Pedidos */}
-              <div className="px-6 py-4 space-y-3">
-                {group.orders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <div>
-                        <p className="font-semibold text-gray-900">
-                          Pedido #{order.id.slice(-8).toUpperCase()}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {formatDate(order.created_at)} • {order.items_count} producto(s)
-                        </p>
-                        {order.notes && (
-                          <div className="flex items-center space-x-1 mt-1">
-                            <FileText className="h-3 w-3 text-gray-400" />
-                            <p className="text-xs text-gray-500 italic">{order.notes}</p>
+              {/* Lista de Clientes */}
+              <div className="px-6 py-4 space-y-6">
+                {day.clients.map((client, clientIndex) => (
+                  <div key={`${client.client_email}-${clientIndex}`} className="border border-orange-200 rounded-lg overflow-hidden">
+                    {/* Header del Cliente - Naranja */}
+                    <div className="bg-gradient-to-r from-orange-500 to-orange-600 px-4 py-3 text-white">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <User className="h-5 w-5" />
+                          <div>
+                            <span className="font-bold">👤 {client.client_name}</span>
+                            <span className="text-sm opacity-90 ml-2">({client.client_email})</span>
                           </div>
-                        )}
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm opacity-90">{client.order_count} pedido(s)</p>
+                          <p className="font-bold">{formatPrice(client.total_amount)}</p>
+                        </div>
                       </div>
+                      
+                      {/* Información de contacto */}
+                      {(client.delivery_address || client.phone) && (
+                        <div className="mt-2 flex flex-wrap items-center gap-4 text-sm opacity-90">
+                          {client.delivery_address && (
+                            <div className="flex items-center space-x-1">
+                              <MapPin className="h-4 w-4" />
+                              <span>{client.delivery_address}</span>
+                            </div>
+                          )}
+                          
+                          {client.phone && (
+                            <div className="flex items-center space-x-1">
+                              <Phone className="h-4 w-4" />
+                              <span>{client.phone}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
 
-                    <div className="flex items-center space-x-3">
-                      {getStatusBadge(order.status)}
-                      
-                      {/* Botones de estado */}
-                      {order.status !== 'delivered' && order.status !== 'cancelled' && (
-                        <Button 
-                          size="sm" 
-                          onClick={() => handleStatusChange(order.id, 'delivered')}
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                        >
-                          ✓ Entregar
-                        </Button>
-                      )}
-                      
-                      {order.status === 'pending' && (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleStatusChange(order.id, 'confirmed')}
-                          className="border-blue-300 text-blue-600 hover:bg-blue-50"
-                        >
-                          Confirmar
-                        </Button>
-                      )}
-                      
-                      <Link href={`/admin/orders/${order.id}`}>
-                        <Button size="sm" variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50">
-                          <Eye className="h-4 w-4 mr-1" />
-                          Ver
-                        </Button>
-                      </Link>
+                    {/* Lista de Pedidos del Cliente */}
+                    <div className="p-4 space-y-3 bg-gray-50">
+                      {client.orders.map((order) => (
+                        <div key={order.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200">
+                          <div className="flex items-center space-x-4">
+                            <div>
+                              <p className="font-semibold text-gray-900">
+                                Pedido #{order.id.slice(-8).toUpperCase()} - {order.items_count} producto(s)
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {formatDate(order.created_at)} • {formatPrice(order.total_amount)}
+                              </p>
+                              {order.notes && (
+                                <div className="flex items-center space-x-1 mt-1">
+                                  <FileText className="h-3 w-3 text-gray-400" />
+                                  <p className="text-xs text-gray-500 italic">{order.notes}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center space-x-3">
+                            {getStatusBadge(order.status)}
+                            
+                            {/* Botones de estado */}
+                            {order.status !== 'delivered' && order.status !== 'cancelled' && (
+                              <Button 
+                                size="sm" 
+                                onClick={() => handleStatusChange(order.id, 'delivered')}
+                                className="bg-green-600 hover:bg-green-700 text-white"
+                              >
+                                ✓ Entregar
+                              </Button>
+                            )}
+                            
+                            {order.status === 'pending' && (
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleStatusChange(order.id, 'confirmed')}
+                                className="border-blue-300 text-blue-600 hover:bg-blue-50"
+                              >
+                                Confirmar
+                              </Button>
+                            )}
+                            
+                            <Link href={`/admin/orders/${order.id}`}>
+                              <Button size="sm" variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50">
+                                <Eye className="h-4 w-4 mr-1" />
+                                Ver
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -447,4 +575,4 @@ export default function OrdersByDayPage() {
       </div>
     </div>
   )
-} 
+}

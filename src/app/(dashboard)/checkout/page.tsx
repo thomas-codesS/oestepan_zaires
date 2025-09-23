@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/auth/auth-context'
 import { useCartStore } from '@/lib/store/cart-store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { formatPrice } from '@/lib/utils/format'
+import { formatPrice, formatPriceBreakdown } from '@/lib/utils/format'
 import { CreateOrderRequest, OrderError } from '@/lib/types/order'
 
 export default function CheckoutPage() {
@@ -253,7 +253,7 @@ export default function CheckoutPage() {
                       Procesando...
                     </div>
                   ) : (
-                    `Confirmar Pedido - ${formatPrice(total)}`
+                    `Confirmar Pedido - ${formatPriceBreakdown(total, 21).total}`
                   )}
                 </Button>
               </div>
@@ -274,7 +274,7 @@ export default function CheckoutPage() {
                     <p className="text-sm text-gray-600 line-clamp-2">{item.product.description}</p>
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-sm text-gray-500">
-                        {formatPrice(item.product.price_with_iva)} c/u
+                        Cantidad: {item.quantity}
                       </span>
                       
                       <div className="flex items-center space-x-2">
@@ -304,24 +304,33 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="text-right ml-4">
-                    <div className="font-semibold text-gray-900">
-                      {formatPrice(item.subtotal)}
-                    </div>
-                  </div>
                 </div>
               ))}
             </div>
 
             <div className="border-t border-gray-200 pt-4 mt-6">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-bold text-gray-900">Total</span>
-                <span className="text-2xl font-bold text-orange-600">
-                  {formatPrice(total)}
-                </span>
-              </div>
+              {(() => {
+                const breakdown = formatPriceBreakdown(total, 21)
+                return (
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">Subtotal:</span>
+                      <span className="text-gray-900">{breakdown.subtotal}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">IVA (21%):</span>
+                      <span className="text-gray-900">{breakdown.iva}</span>
+                    </div>
+                    <hr className="border-gray-200" />
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-bold text-gray-900">Total:</span>
+                      <span className="text-2xl font-bold text-orange-600">{breakdown.total}</span>
+                    </div>
+                  </div>
+                )
+              })()}
               <p className="text-xs text-gray-500 mt-1 text-right">
-                Precios incluyen IVA
+                Precios finales con IVA incluido
               </p>
             </div>
 

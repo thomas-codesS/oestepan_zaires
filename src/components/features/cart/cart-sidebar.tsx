@@ -4,7 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useCartStore, useCartStats } from '@/lib/store/cart-store'
-import { formatPrice } from '@/lib/utils/format'
+import { formatPrice, formatCartPriceBreakdown } from '@/lib/utils/format'
 import { X, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react'
 
 export function CartSidebar() {
@@ -81,67 +81,55 @@ export function CartSidebar() {
               </Link>
             </div>
           ) : (
-            /* Lista de productos */
-            <div className="p-6 space-y-4">
+            /* Lista de productos - Versión simplificada */
+            <div className="p-4 space-y-2">
               {items.map((item) => (
-                <div key={item.product.id} className="bg-gray-50 rounded-lg p-4">
-                  {/* Información del producto */}
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900 mb-1">
+                <div key={item.product.id} className="border-b border-gray-200 pb-3 mb-3">
+                  {/* Fila simple del producto */}
+                  <div className="flex items-center justify-between">
+                    {/* Info del producto */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-gray-900 text-sm truncate">
                         {item.product.name}
                       </h4>
-                      <p className="text-sm text-gray-600 mb-2">
-                        {item.product.category}
-                      </p>
-                      <p className="text-sm font-medium text-orange-600">
-                        {formatPrice(item.product.price_with_iva)} c/u
+                      <p className="text-xs text-gray-500">
+                        ${formatPrice(item.product.price)} c/u
                       </p>
                     </div>
-                    
-                    {/* Botón eliminar */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeItem(item.product.id)}
-                      className="text-red-500 hover:text-red-700 p-1"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
 
-                  {/* Controles de cantidad */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
+                    {/* Controles de cantidad inline */}
+                    <div className="flex items-center space-x-2 ml-2">
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                         disabled={item.quantity <= 1}
-                        className="h-8 w-8 p-0"
+                        className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700"
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
                       
-                      <span className="font-medium w-8 text-center">
+                      <span className="font-medium text-sm w-8 text-center">
                         {item.quantity}
                       </span>
                       
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                        className="h-8 w-8 p-0"
+                        className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700"
                       >
                         <Plus className="h-3 w-3" />
                       </Button>
-                    </div>
-                    
-                    {/* Subtotal */}
-                    <div className="text-right">
-                      <p className="font-semibold text-gray-900">
-                        {formatPrice(item.subtotal)}
-                      </p>
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeItem(item.product.id)}
+                        className="h-6 w-6 p-0 text-red-500 hover:text-red-700 ml-2"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -153,13 +141,29 @@ export function CartSidebar() {
         {/* Footer - Total y acciones */}
         {!isEmpty && (
           <div className="border-t bg-gray-50 p-6 space-y-4">
-            {/* Total */}
-            <div className="flex justify-between items-center text-lg font-semibold">
-              <span className="text-gray-900">Total:</span>
-              <span className="text-orange-600">
-                {formatPrice(total)}
-              </span>
-            </div>
+            {/* Desglose de totales */}
+            {(() => {
+              const breakdown = formatCartPriceBreakdown(items)
+              return (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-gray-600">Subtotal:</span>
+                    <span className="text-gray-900">{breakdown.subtotal}</span>
+                  </div>
+                  {breakdown.ivaBreakdown.map((ivaItem) => (
+                    <div key={ivaItem.rate} className="flex justify-between items-center text-sm">
+                      <span className="text-gray-600">IVA ({ivaItem.rate}%):</span>
+                      <span className="text-gray-900">{formatPrice(ivaItem.amount)}</span>
+                    </div>
+                  ))}
+                  <hr className="border-gray-200" />
+                  <div className="flex justify-between items-center text-lg font-semibold">
+                    <span className="text-gray-900">Total:</span>
+                    <span className="text-orange-600">{breakdown.total}</span>
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Botones de acción */}
             <div className="space-y-3">
@@ -196,7 +200,7 @@ export function CartSidebar() {
 
             {/* Info adicional */}
             <div className="text-xs text-gray-500 text-center">
-              Los precios incluyen IVA
+              Precios finales con IVA incluido
             </div>
           </div>
         )}

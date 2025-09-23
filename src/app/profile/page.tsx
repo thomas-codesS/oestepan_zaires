@@ -14,6 +14,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     full_name: '',
     company_name: '',
+    razon_social: '',
     delivery_days: [] as number[]
   })
   const [loading, setLoading] = useState(false)
@@ -33,6 +34,7 @@ export default function ProfilePage() {
       setFormData({
         full_name: profile.full_name || '',
         company_name: profile.company_name || '',
+        razon_social: profile.razon_social || '',
         delivery_days: profile.delivery_days || []
       })
     }
@@ -62,6 +64,7 @@ export default function ProfilePage() {
       await updateProfile({
         full_name: formData.full_name || undefined,
         company_name: formData.company_name || undefined,
+        razon_social: formData.razon_social || undefined,
         delivery_days: formData.delivery_days.length > 0 ? formData.delivery_days : undefined
       })
       
@@ -173,6 +176,10 @@ export default function ProfilePage() {
                   <span>{profile?.company_name || 'No especificada'}</span>
                 </div>
                 <div className="flex justify-between">
+                  <span className="text-gray-600">Razón Social:</span>
+                  <span>{profile?.razon_social || 'No especificada'}</span>
+                </div>
+                <div className="flex justify-between">
                   <span className="text-gray-600">Días de entrega:</span>
                   <span>
                     {profile?.delivery_days && profile.delivery_days.length > 0 
@@ -224,6 +231,18 @@ export default function ProfilePage() {
                 value={formData.company_name}
                 onChange={handleInputChange}
                 placeholder="Nombre de tu empresa"
+                className="border-orange-200 focus:border-orange-400 focus:ring-orange-200"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+              <Input
+                label="Razón Social (opcional)"
+                type="text"
+                name="razon_social"
+                value={formData.razon_social}
+                onChange={handleInputChange}
+                placeholder="Razón social de la empresa"
                 className="border-orange-200 focus:border-orange-400 focus:ring-orange-200"
               />
             </div>

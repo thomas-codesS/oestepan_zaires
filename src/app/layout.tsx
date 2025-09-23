@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Oeste Pan - Sistema de Gestión",
-  description: "Sistema de gestión para Oeste Pan SRL",
+  title: "Oeste Pan - Panadería Artesanal | Pan Recién Horneado",
+  description: "Panadería familiar desde 2008. Pan artesanal, pasteles y tortas horneados diariamente con ingredientes de primera calidad. Pedidos online disponibles.",
 };
 
 export default function RootLayout({

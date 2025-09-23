@@ -1,4 +1,4 @@
-# 📋 Plan de Trabajo Detallado - Oeste Pan SRL
+s# 📋 Plan de Trabajo Detallado - Oeste Pan SRL
 ## 🎯 **Proyecto:** Sistema de Gestión Integral
 ## ⏱️ **Duración:** 6 Semanas (1.5 meses)
 

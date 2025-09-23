@@ -126,6 +126,30 @@ export async function GET(request: NextRequest) {
     }
 
     console.log(`✅ Encontrados ${orders?.length || 0} pedidos`);
+    
+    // Debug: Verificar estructura de los primeros pedidos
+    if (orders && orders.length > 0) {
+      console.log('🔍 Debug primer pedido crudo:', JSON.stringify(orders[0], null, 2));
+      console.log('📦 Items del primer pedido:', orders[0].order_items);
+      
+      // Si no hay order_items, intentar obtenerlos manualmente
+      if (!orders[0].order_items || orders[0].order_items.length === 0) {
+        console.log('⚠️ No se encontraron order_items en la consulta automática, intentando consulta manual...');
+        const { data: manualItems, error: manualError } = await supabase
+          .from('order_items')
+          .select('*')
+          .eq('order_id', orders[0].id);
+        
+        if (manualError) {
+          console.error('❌ Error en consulta manual de order_items:', manualError);
+        } else {
+          console.log('🔍 Items encontrados manualmente:', manualItems?.length || 0);
+          if (manualItems && manualItems.length > 0) {
+            console.log('📦 Primer item manual:', manualItems[0]);
+          }
+        }
+      }
+    }
 
     // Obtener información de usuarios únicos
     const userIds = [...new Set(orders?.map(order => order.user_id) || [])];
@@ -137,8 +161,42 @@ export async function GET(request: NextRequest) {
     // Crear mapa de usuarios para búsqueda rápida
     const usersMap = new Map(usersData?.map(user => [user.id, user]) || []);
 
+    // Obtener items manualmente para pedidos que no los tienen
+    const ordersWithManualItems = await Promise.all((orders || []).map(async (order: any) => {
+      let orderItems = order.order_items || [];
+      
+      // Si no hay items en la consulta automática, obtenerlos manualmente
+      if (!orderItems || orderItems.length === 0) {
+        console.log(`🔍 Obteniendo items manualmente para pedido ${order.id}`);
+        const { data: manualItems, error: manualError } = await supabase
+          .from('order_items')
+          .select(`
+            id,
+            product_id,
+            product_code,
+            product_name,
+            quantity,
+            unit_price,
+            unit_price_with_iva,
+            iva_rate,
+            line_total,
+            created_at
+          `)
+          .eq('order_id', order.id);
+        
+        if (!manualError && manualItems) {
+          orderItems = manualItems;
+          console.log(`✅ Encontrados ${manualItems.length} items manualmente para pedido ${order.id}`);
+        } else if (manualError) {
+          console.error(`❌ Error obteniendo items manualmente para pedido ${order.id}:`, manualError);
+        }
+      }
+      
+      return { ...order, order_items: orderItems };
+    }));
+
     // Transformar datos al formato esperado
-    const ordersWithItems: OrderWithItems[] = (orders || []).map((order: any) => {
+    const ordersWithItems: OrderWithItems[] = ordersWithManualItems.map((order: any) => {
       const userData = usersMap.get(order.user_id);
       
       return {
@@ -187,6 +245,16 @@ export async function GET(request: NextRequest) {
     };
 
     console.log('🎉 Respuesta preparada:', { total: totalCount, page, totalPages });
+    
+    // Debug: Verificar estructura final
+    if (ordersWithItems.length > 0) {
+      console.log('🔍 Debug primer pedido transformado:', {
+        id: ordersWithItems[0].id,
+        total_amount: ordersWithItems[0].total_amount,
+        items_count: ordersWithItems[0].items?.length || 0,
+        first_item: ordersWithItems[0].items?.[0] || null
+      });
+    }
 
     return NextResponse.json(response);
   } catch (error) {
@@ -279,12 +347,7 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      if (product.stock_quantity < item.quantity) {
-        return NextResponse.json(
-          { error: `Stock insuficiente para ${item.product_name}. Disponible: ${product.stock_quantity}` },
-          { status: 400 }
-        );
-      }
+      // Stock control disabled - no validation needed
     }
 
     // Calcular total basado en items
@@ -343,28 +406,27 @@ export async function POST(request: NextRequest) {
     
     console.log('📦 Items a insertar:', orderItems.length, 'items con todos los campos obligatorios');
 
-    const { error: itemsError } = await supabase
+    const { data: insertedItems, error: itemsError } = await supabase
       .from('order_items')
-      .insert(orderItems);
+      .insert(orderItems)
+      .select();
 
     if (itemsError) {
-      console.error('Error creating order items:', itemsError);
+      console.error('❌ Error creating order items:', JSON.stringify(itemsError, null, 2));
+      console.error('📦 Items que se intentaron insertar:', JSON.stringify(orderItems, null, 2));
       await supabase.from('orders').delete().eq('id', order.id);
       return NextResponse.json(
-        { error: 'Error al crear items del pedido' },
+        { error: 'Error al crear items del pedido', details: itemsError.message },
         { status: 500 }
       );
     }
 
-    for (const item of orderData.items) {
-      const product = products?.find(p => p.id === item.product_id);
-      if (product) {
-        await supabase
-          .from('products')
-          .update({ stock_quantity: product.stock_quantity - item.quantity })
-          .eq('id', item.product_id);
-      }
+    console.log('✅ Items insertados exitosamente:', insertedItems?.length || 0);
+    if (insertedItems && insertedItems.length > 0) {
+      console.log('📦 Primer item insertado:', insertedItems[0]);
     }
+
+    // Stock control disabled - no need to update stock quantities
 
     console.log('🔍 Obteniendo pedido completo con estructura REAL...');
     
