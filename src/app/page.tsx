@@ -78,8 +78,8 @@ export default function Home() {
                   <span className="block text-amber-800">cada día</span>
                 </h1>
                 <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed text-pretty max-w-lg">
-                  Somos una empresa familiar con más de 15 años de experiencia en panificados, nacida del esfuerzo compartido entre un padre y sus hijos.
-                  Desde nuestros comienzos trabajamos con amor, compromiso y dedicación para brindar productos de calidad que acompañen el día a día de nuestros clientes.
+                  Somos una empresa familiar con más de 20 años de experiencia en panificados.
+                  Trabajamos con pasión, compromiso y responsabilidad ofreciendo diariamente productos de alta calidad y máxima frescura.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-6">
@@ -107,14 +107,14 @@ export default function Home() {
                 <div className="space-y-6">
                   <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-all duration-500 hover:shadow-3xl">
                     <img
-                      src="https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=400&h=300&fit=crop&crop=center"
+                      src="/imagenes_stock_paginaprincipal/panes.jpeg"
                       alt="Pan recién horneado"
                       className="w-full h-48 object-cover"
                     />
                   </div>
                   <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-all duration-500 hover:shadow-3xl">
                     <img
-                      src="https://images.unsplash.com/photo-1506459225024-1428097a7e18?w=400&h=300&fit=crop&crop=center"
+                      src="/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.10 PM (3).jpeg"
                       alt="Panadería artesanal"
                       className="w-full h-64 object-cover"
                     />
@@ -123,15 +123,15 @@ export default function Home() {
                 <div className="space-y-6 pt-12">
                   <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-all duration-500 hover:shadow-3xl">
                     <img
-                      src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400&h=300&fit=crop&crop=center"
+                      src="/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.11 PM (1).jpeg"
                       alt="Pasteles y tortas"
                       className="w-full h-64 object-cover"
                     />
                   </div>
                   <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-all duration-500 hover:shadow-3xl">
                     <img
-                      src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop&crop=center"
-                      alt="Café y medialunas"
+                      src="/imagenes_stock_paginaprincipal/medialuna.jpeg"
+                      alt="Medialunas"
                       className="w-full h-48 object-cover"
                     />
                   </div>
@@ -157,22 +157,22 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {[
               {
-                image: "https://images.unsplash.com/photo-1568476868493-5de8ad17a4ba?w=500&h=350&fit=crop&crop=center",
+                image: "/imagenes_stock_paginaprincipal/panes.jpeg",
                 title: "Pan Artesanal",
                 description:
                   "Panes tradicionales horneados diariamente con masa madre y ingredientes naturales de primera calidad. Elaborados con técnicas artesanales transmitidas de generación en generación.",
               },
               {
-                image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&h=350&fit=crop&crop=center",
+                image: "/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.14 PM (3).jpeg",
                 title: "Pasteles & Tortas",
                 description:
                   "Deliciosos pasteles y tortas personalizadas para tus celebraciones especiales, hechas con amor y los mejores ingredientes para crear momentos únicos e inolvidables.",
               },
               {
-                image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500&h=350&fit=crop&crop=center",
-                title: "Café & Medialunas",
+                image: "/imagenes_stock_paginaprincipal/medialuna.jpeg",
+                title: "Medialunas",
                 description:
-                  "El complemento perfecto: café de especialidad tostado artesanalmente y medialunas recién horneadas para empezar el día con energía y el mejor sabor.",
+                  "Medialunas recién horneadas para acompañar tu desayuno o merienda, elaboradas con la mejor calidad y máxima frescura.",
               },
             ].map((product, index) => (
               <div
@@ -204,47 +204,45 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-6">
                   <img
-                    src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=300&fit=crop&crop=center"
+                    src="/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.14 PM.jpeg"
                     alt="Panadería tradicional"
                     className="w-full h-48 object-cover rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
                   />
                   <img
-                    src="https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=400&h=300&fit=crop&crop=center"
+                    src="/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.15 PM (1).jpeg"
                     alt="Proceso artesanal"
                     className="w-full h-64 object-cover rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
                   />
                 </div>
                 <div className="space-y-6 pt-12">
                   <img
-                    src="https://images.unsplash.com/photo-1506459225024-1428097a7e18?w=400&h=300&fit=crop&crop=center"
+                    src="/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.15 PM (3).jpeg"
                     alt="Ingredientes frescos"
                     className="w-full h-64 object-cover rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
                   />
                   <img
-                    src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&crop=center"
+                    src="/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.15 PM.jpeg"
                     alt="Equipo de trabajo"
                     className="w-full h-48 object-cover rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
                   />
                 </div>
               </div>
               <div className="absolute -bottom-8 -right-8 bg-black text-white p-8 lg:p-10 rounded-3xl shadow-2xl animate-float">
-                <p className="text-4xl lg:text-5xl font-bold">15+</p>
+                <p className="text-4xl lg:text-5xl font-bold">20+</p>
                 <p className="text-gray-300 font-medium text-lg lg:text-xl">Años de tradición</p>
               </div>
             </div>
             <div className="space-y-10 order-1 lg:order-2 animate-fade-in-left">
               <div className="space-y-8">
-                <h2 className="text-4xl lg:text-5xl font-bold text-black text-balance">Nuestra Historia Familiar</h2>
+                <h2 className="text-4xl lg:text-5xl font-bold text-black text-balance">Nosotros</h2>
                 <div className="space-y-6 text-gray-700">
+                  <h3 className="text-2xl font-bold text-black">Nuestra Logística y Distribución</h3>
                   <p className="text-xl leading-relaxed text-pretty">
-                    En Oeste Pan, combinamos logística y alimentos de excelencia para garantizar entregas seguras, rápidas y confiables.
-                    Creemos que el verdadero valor está en cada detalle: desde la selección de materias primas hasta la atención técnica y comercial personalizada que ofrecemos a quienes nos eligen.
+                    Desde DDA Oeste Pan SRL garantizamos entregas seguras, rápidas y eficientes.
+                    Ofrecemos atención técnica y comercial personalizada que nos distingue en el mercado.
                   </p>
                   <p className="text-xl leading-relaxed text-pretty">
                     Nuestra visión es seguir creciendo con la misma pasión que nos vio empezar, para convertirnos en el proveedor de panificados congelados más importante, reconocido por nuestra calidad y atención.
-                  </p>
-                  <p className="text-xl leading-relaxed text-pretty">
-                    Nuestro esfuerzo diario tiene un objetivo claro: Que el mejor pan y las medialunas más ricas lleguen a la mesa de todos los consumidores, manteniendo siempre la esencia que nos define: calidad, confianza y tradición familiar.
                   </p>
                 </div>
               </div>
@@ -266,18 +264,18 @@ export default function Home() {
       <section className="py-20 lg:py-32 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20 space-y-6">
-            <h2 className="text-4xl lg:text-5xl font-bold text-black text-balance">Visitanos o Hacé tu Pedido</h2>
+            <h2 className="text-4xl lg:text-5xl font-bold text-black text-balance">Hacé tu Pedido</h2>
             <p className="text-xl lg:text-2xl text-gray-600 text-pretty">
-              Estamos aquí para servirte con el mejor pan de la zona
+              Armá tu pedido, pasalo por WhatsApp o entrá a la app
             </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
             {[
-              "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop&crop=center",
-              "https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=400&h=300&fit=crop&crop=center",
-              "https://images.unsplash.com/photo-1506459225024-1428097a7e18?w=400&h=300&fit=crop&crop=center",
-              "https://images.unsplash.com/photo-1571115764595-644a1f56a55c?w=400&h=300&fit=crop&crop=center",
+              "/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.16 PM (2).jpeg",
+              "/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.14 PM (2).jpeg",
+              "/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.14 PM (3).jpeg",
+              "/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.14 PM (4).jpeg",
             ].map((src, index) => (
               <div
                 key={index}
@@ -312,7 +310,7 @@ export default function Home() {
                   { day: "Lunes a Viernes", hours: "08:00 - 16:00" },
                   { day: "Sábados", hours: "Cerrado" },
                   { day: "Domingos", hours: "Cerrado" },
-                  { day: "Feriados", hours: "Cerrado" },
+                  { day: "Feriados", hours: "Entregando" },
                 ].map((schedule, index) => (
                   <div
                     key={index}
@@ -355,7 +353,7 @@ export default function Home() {
                   },
                   {
                     icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
-                    text: "Horario de atención:\nLunes a Viernes, de 08:00 a 16:00 hs.",
+                    text: "Horario de atención de administración:\nLunes a Viernes, de 08:00 a 16:00 hs.",
                   },
                 ].map((contact, index) => (
                   <div
@@ -394,7 +392,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-300 max-w-md leading-relaxed text-pretty text-lg">
-                Desde 2008, llevando a tu mesa el mejor pan artesanal con el amor y la tradición de una panadería
+                Desde 2001, llevando a tu mesa el mejor pan artesanal con la pasión y la tradición de una panadería
                 familiar.
               </p>
               <div className="flex gap-6">
@@ -458,8 +456,9 @@ export default function Home() {
                 <div className="pt-6 space-y-3">
                   <p className="text-white font-bold text-xl">Horarios de Atención:</p>
                   <div className="text-base space-y-2">
-                    <p>Lunes a Viernes: 08:00 - 16:00</p>
+                    <p>Administración - Lunes a Viernes: 08:00 - 16:00</p>
                     <p>Sábados y Domingos: Cerrado</p>
+                    <p>Feriados: Entregando</p>
                   </div>
                 </div>
               </div>
