@@ -66,21 +66,21 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
             Oeste Pan
           </h1>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          <h2 className="mt-4 sm:mt-6 text-2xl sm:text-3xl font-bold text-gray-900">
             Iniciar Sesión
           </h2>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-sm sm:text-base text-gray-600">
             Accede a tu cuenta para gestionar pedidos
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-8 border border-orange-100">
+        <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-orange-100">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -113,19 +113,19 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 text-lg font-semibold transition-colors duration-200"
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white py-2.5 sm:py-3 text-base sm:text-lg font-semibold transition-colors duration-200"
             >
               {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </Button>
           </form>
 
-          <div className="mt-6 text-center space-y-4">
+          <div className="mt-4 sm:mt-6 text-center space-y-3 sm:space-y-4">
             <div>
-              <Link href="/forgot-password" className="text-orange-600 hover:text-orange-700 font-semibold">
+              <Link href="/forgot-password" className="text-sm sm:text-base text-orange-600 hover:text-orange-700 font-semibold">
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
-            <p className="text-gray-600">
+            <p className="text-sm sm:text-base text-gray-600">
               ¿No tienes cuenta?{' '}
               <Link href="/register" className="text-orange-600 hover:text-orange-700 font-semibold">
                 Regístrate aquí
@@ -134,7 +134,7 @@ export default function LoginPage() {
           </div>
 
           {/* Herramientas de solución de problemas */}
-          <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="mt-4 sm:mt-6 bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
             <h3 className="font-semibold text-red-900 mb-2">¿Problemas para iniciar sesión?</h3>
             <p className="text-red-700 text-sm mb-3">
               Si tienes problemas con sesiones que no se cierran o no puedes iniciar sesión, usa estas herramientas:

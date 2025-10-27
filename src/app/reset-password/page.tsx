@@ -118,21 +118,21 @@ function ResetPasswordForm() {
   // Mostrar error si no hay sesión válida
   if (validSession === false) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-6 sm:space-y-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
               Oeste Pan
             </h1>
-            <div className="mt-6 flex justify-center">
-              <AlertCircle className="h-16 w-16 text-red-500" />
+            <div className="mt-4 sm:mt-6 flex justify-center">
+              <AlertCircle className="h-12 w-12 sm:h-16 sm:w-16 text-red-500" />
             </div>
-            <h2 className="mt-4 text-2xl font-bold text-gray-900">
+            <h2 className="mt-4 text-xl sm:text-2xl font-bold text-gray-900">
               Enlace Inválido
             </h2>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-8 border border-orange-100">
+          <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-orange-100">
             <div className="text-center space-y-4">
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <p className="text-red-800">
@@ -167,21 +167,21 @@ function ResetPasswordForm() {
   // Mostrar éxito
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-6 sm:space-y-8">
           <div className="text-center">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
               Oeste Pan
             </h1>
-            <div className="mt-6 flex justify-center">
-              <CheckCircle className="h-16 w-16 text-green-500" />
+            <div className="mt-4 sm:mt-6 flex justify-center">
+              <CheckCircle className="h-12 w-12 sm:h-16 sm:w-16 text-green-500" />
             </div>
-            <h2 className="mt-4 text-2xl font-bold text-gray-900">
+            <h2 className="mt-4 text-xl sm:text-2xl font-bold text-gray-900">
               Contraseña Actualizada
             </h2>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-8 border border-orange-100">
+          <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-orange-100">
             <div className="text-center space-y-4">
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <p className="text-green-800">
@@ -209,21 +209,21 @@ function ResetPasswordForm() {
 
   // Formulario principal
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-6 sm:space-y-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
             Oeste Pan
           </h1>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          <h2 className="mt-4 sm:mt-6 text-2xl sm:text-3xl font-bold text-gray-900">
             Nueva Contraseña
           </h2>
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-sm sm:text-base text-gray-600">
             Ingresa tu nueva contraseña
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-8 border border-orange-100">
+        <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-orange-100">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
