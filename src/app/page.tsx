@@ -37,28 +37,35 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       <header className="bg-white shadow-xl sticky top-0 z-50 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+          <div className="flex justify-between items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-6">
               <div className="transform hover:scale-105 transition-transform duration-300">
-                <Image src="/logo_oestepan.png" alt="Oeste Pan" width={120} height={120} className="object-contain" />
+                <Image 
+                  src="/logo_oestepan.png" 
+                  alt="Oeste Pan" 
+                  width={120} 
+                  height={120} 
+                  className="object-contain w-16 h-16 sm:w-24 sm:h-24 lg:w-[120px] lg:h-[120px]" 
+                />
               </div>
-              <div>
+              <div className="hidden md:block">
                 <h1 className="text-4xl lg:text-5xl font-bold text-brand text-balance">Oeste Pan</h1>
                 <p className="text-lg lg:text-xl text-gray-600 font-medium">Panadería Artesanal</p>
               </div>
             </div>
-            <nav className="flex items-center gap-4">
+            <nav className="flex items-center gap-2 sm:gap-4">
               <Link href="/login">
                 <Button
                   variant="outline"
-                  className="border-2 border-black text-black hover:bg-black hover:text-white font-semibold bg-transparent transition-all duration-300 px-6 py-3"
+                  className="border-2 border-black text-black hover:bg-black hover:text-white font-semibold bg-transparent transition-all duration-300 text-xs sm:text-sm px-3 py-2 sm:px-6 sm:py-3"
                 >
-                  Iniciar Sesión
+                  <span className="hidden sm:inline">Iniciar Sesión</span>
+                  <span className="sm:hidden">Entrar</span>
                 </Button>
               </Link>
               <Link href="/register">
-                <Button className="bg-black hover:bg-gray-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-3">
+                <Button className="bg-black hover:bg-gray-800 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 text-xs sm:text-sm px-3 py-2 sm:px-6 sm:py-3">
                   Registrarse
                 </Button>
               </Link>
