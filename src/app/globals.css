@@ -59,11 +59,11 @@
 
 @layer base {
   * {
-    border-color: hsl(var(--border));
+    border-color: rgb(var(--border));
   }
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -150,6 +150,11 @@
   
   .text-pretty {
     text-wrap: pretty;
+  }
+  
+  /* Brand text color */
+  .text-brand {
+    color: #004aad;
   }
   
   .shadow-3xl {

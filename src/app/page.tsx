@@ -44,7 +44,7 @@ export default function Home() {
                 <Image src="/logo_oestepan.png" alt="Oeste Pan" width={120} height={120} className="object-contain" />
               </div>
               <div>
-                <h1 className="text-4xl lg:text-5xl font-bold text-amber-800 text-balance">Oeste Pan</h1>
+                <h1 className="text-4xl lg:text-5xl font-bold text-brand text-balance">Oeste Pan</h1>
                 <p className="text-lg lg:text-xl text-gray-600 font-medium">Panadería Artesanal</p>
               </div>
             </div>
