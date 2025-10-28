@@ -131,7 +131,7 @@ export default function Home() {
                   <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-all duration-500 hover:shadow-3xl">
                     <img
                       src="/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.11 PM (1).jpeg"
-                      alt="Pasteles y tortas"
+                      alt="Pastafrolas y dulces artesanales"
                       className="w-full h-64 object-cover"
                     />
                   </div>
@@ -171,9 +171,9 @@ export default function Home() {
               },
               {
                 image: "/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.14 PM (3).jpeg",
-                title: "Pasteles & Tortas",
+                title: "Dulces",
                 description:
-                  "Deliciosos pasteles y tortas personalizadas para tus celebraciones especiales, hechas con amor y los mejores ingredientes para crear momentos únicos e inolvidables.",
+                  "Alfajores, Pasta frolas, tartas dulces, budines y otras delicias clásicas elaboradas con recetas familiares, ideales para compartir en cada mesa y disfrutar sabores artesanales.",
               },
               {
                 image: "/imagenes_stock_paginaprincipal/medialuna.jpeg",
@@ -216,20 +216,20 @@ export default function Home() {
                     className="w-full h-48 object-cover rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
                   />
                   <img
-                    src="/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.15 PM (1).jpeg"
-                    alt="Proceso artesanal"
+                    src="/imagenes_stock_paginaprincipal/pan_hamburguesa.jpg"
+                    alt="Panes para hamburguesas"
                     className="w-full h-64 object-cover rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
                   />
                 </div>
                 <div className="space-y-6 pt-12">
                   <img
-                    src="/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.15 PM (3).jpeg"
-                    alt="Ingredientes frescos"
+                    src="/imagenes_stock_paginaprincipal/facturas landing.jpg"
+                    alt="Facturas artesanales"
                     className="w-full h-64 object-cover rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
                   />
                   <img
-                    src="/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.15 PM.jpeg"
-                    alt="Equipo de trabajo"
+                    src="/imagenes_stock_paginaprincipal/prepizza.jpg"
+                    alt="Prepizzas artesanales"
                     className="w-full h-48 object-cover rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
                   />
                 </div>
