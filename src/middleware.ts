@@ -69,6 +69,8 @@ export async function middleware(request: NextRequest) {
     '/debug-session', // Página de debug accesible sin autenticación
     '/debug-login', // Página de debug de login accesible sin autenticación
     '/test-orders', // Página de test de orders accesible sin autenticación
+    '/auth/callback', // Callback de confirmación de email
+    '/diagnostico-auth', // Página de diagnóstico de autenticación
   ];
 
   const authRoutes = ['/login', '/register', '/auth/forgot-password'];

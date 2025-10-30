@@ -186,7 +186,7 @@ export default function CheckoutPage() {
                   className="border-orange-200 focus:border-orange-400 focus:ring-orange-200"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Opcional - Si no especificas, se preparará para entrega inmediata
+                  Especificar día de entrega
                 </p>
               </div>
 
@@ -204,7 +204,7 @@ export default function CheckoutPage() {
                   className="border-orange-200 focus:border-orange-400 focus:ring-orange-200"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Opcional - Para delivery o referencia de retiro
+                  Dirección de entrega - Especificar bien
                 </p>
               </div>
 
@@ -222,7 +222,7 @@ export default function CheckoutPage() {
                   className="border-orange-200 focus:border-orange-400 focus:ring-orange-200"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Para coordinar la entrega o retiro
+                  Para coordinar la entrega
                 </p>
               </div>
 

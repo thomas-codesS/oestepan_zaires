@@ -115,7 +115,9 @@ export const authService = {
           full_name: credentials.full_name,
           company_name: credentials.company_name,
           role: 'cliente'
-        }
+        },
+        // Nota: emailRedirectTo solo funciona si está habilitada la confirmación de email
+        emailRedirectTo: `${window.location.origin}/auth/callback`
       }
     })
 
@@ -123,17 +125,41 @@ export const authService = {
       throw new Error(error.message)
     }
 
-    if (!data.user || !data.session) {
-      throw new Error('No user or session returned after sign up')
+    if (!data.user) {
+      throw new Error('No se pudo crear el usuario')
     }
 
+    // Si no hay sesión, significa que requiere confirmación de email
+    if (!data.session) {
+      throw new Error('CONFIRM_EMAIL_REQUIRED')
+    }
+
+    // Si hay sesión, el usuario fue confirmado automáticamente
     let profile = null;
     try {
-      const { data: profileData } = await supabase.from('profiles').select('*').eq('id', data.user.id).single()
-      profile = profileData;
+      // Intentar obtener el perfil, con reintentos
+      const maxRetries = 3;
+      for (let i = 0; i < maxRetries; i++) {
+        await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)));
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single()
+        
+        if (profileData) {
+          profile = profileData;
+          break;
+        }
+        
+        if (i === maxRetries - 1 && !profileData) {
+          console.error('Error fetching profile in signUp:', profileError);
+          throw new Error('No se pudo crear el perfil de usuario. Por favor, contacta al administrador.');
+        }
+      }
     } catch (profileError) {
       console.error('Error fetching profile in signUp:', profileError);
-      throw new Error('Failed to fetch user profile after signup');
+      throw new Error('No se pudo crear el perfil de usuario. Por favor, contacta al administrador.');
     }
 
     return {
@@ -341,6 +367,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(logged)
       setProfile(logged.profile ?? null)
       
+      // Forzar redirección inmediata después del login exitoso
+      // Esto evita el problema de necesitar refrescar la página
+      console.log('🔄 Redirigiendo al dashboard...')
+      if (typeof window !== 'undefined') {
+        window.location.href = '/dashboard'
+      }
+      
     } catch (error) {
       console.error('❌ Error en signIn:', error)
       // Limpiar estado en caso de error
@@ -355,10 +388,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (credentials: SignUpCredentials) => {
     setLoading(true)
-    const registered = await authService.signUp(credentials)
-    setUser(registered)
-    setProfile(registered.profile ?? null)
-    setLoading(false)
+    try {
+      const registered = await authService.signUp(credentials)
+      setUser(registered)
+      setProfile(registered.profile ?? null)
+      
+      // Redirigir al dashboard después del registro exitoso
+      if (typeof window !== 'undefined') {
+        window.location.href = '/dashboard'
+      }
+    } catch (error) {
+      throw error
+    } finally {
+      setLoading(false)
+    }
   }
 
   const signOut = async () => {

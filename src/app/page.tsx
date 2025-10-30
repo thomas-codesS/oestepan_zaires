@@ -81,8 +81,8 @@ export default function Home() {
             <div className="space-y-10 animate-fade-in-up">
               <div className="space-y-8">
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-black leading-tight text-balance">
-                  Pan recién horneado
-                  <span className="block text-amber-800">cada día</span>
+                  Fabricacion artesanal,
+                  <span className="block text-amber-800">cada día.</span>
                 </h1>
                 <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed text-pretty max-w-lg">
                   Somos una empresa familiar con más de 20 años de experiencia en panificados.
@@ -164,10 +164,10 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {[
               {
-                image: "/imagenes_stock_paginaprincipal/panes.jpeg",
-                title: "Pan Artesanal",
+                image: "/imagenes_stock_paginaprincipal/panes_crudos.jpeg",
+                title: "Pan Crudos",
                 description:
-                  "Panes tradicionales horneados diariamente con masa madre y ingredientes naturales de primera calidad. Elaborados con técnicas artesanales transmitidas de generación en generación.",
+                  "Panes tradicionales con ingredientes naturales de primera calidad. Elaborados con técnicas artesanales transmitidas de generación en generación.",
               },
               {
                 image: "/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.14 PM (3).jpeg",
@@ -179,7 +179,7 @@ export default function Home() {
                 image: "/imagenes_stock_paginaprincipal/medialuna.jpeg",
                 title: "Medialunas",
                 description:
-                  "Medialunas recién horneadas para acompañar tu desayuno o merienda, elaboradas con la mejor calidad y máxima frescura.",
+                  "Medialunas elaboradas con la mejor calidad y máxima frescura.",
               },
             ].map((product, index) => (
               <div

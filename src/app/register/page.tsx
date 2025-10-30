@@ -53,7 +53,14 @@ export default function RegisterPage() {
       
       // La redirección se maneja automáticamente en el contexto de auth
     } catch (err: any) {
-      setError(err.message || 'Error al crear la cuenta')
+      console.error('Error en registro:', err)
+      
+      // Manejar caso especial de confirmación de email requerida
+      if (err.message === 'CONFIRM_EMAIL_REQUIRED') {
+        setError('¡Cuenta creada! Por favor revisa tu email para confirmar tu cuenta antes de iniciar sesión.')
+      } else {
+        setError(err.message || 'Error al crear la cuenta')
+      }
     } finally {
       setLoading(false)
     }
