@@ -8,6 +8,7 @@ export interface Product {
   category?: string
   is_active: boolean
   stock_quantity: number
+  image_url?: string // URL de la imagen del producto
   created_at: string
   updated_at: string
 }
@@ -20,6 +21,7 @@ export interface CreateProductRequest {
   iva_rate?: number
   category?: string
   stock_quantity?: number
+  image_url?: string
 }
 
 export interface UpdateProductRequest extends Partial<CreateProductRequest> {

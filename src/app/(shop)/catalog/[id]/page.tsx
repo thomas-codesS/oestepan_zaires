@@ -17,6 +17,7 @@ interface Product {
   category: string
   is_active: boolean
   stock_quantity: number
+  image_url?: string
   created_at: string
   updated_at: string
 }
@@ -190,15 +191,23 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-orange-100">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
-            {/* Imagen del producto (placeholder) */}
+            {/* Imagen del producto */}
             <div className="space-y-4">
-              <div className="aspect-square bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center border-2 border-orange-200">
-                <div className="text-center">
-                  <div className="text-6xl mb-4">{getCategoryEmoji(product.category)}</div>
-                  <p className="text-orange-600 font-medium">Imagen del producto</p>
-                  <p className="text-orange-500 text-sm">Próximamente</p>
+              {product.image_url ? (
+                <div className="aspect-square rounded-xl overflow-hidden border-2 border-orange-200">
+                  <img 
+                    src={product.image_url} 
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              </div>
+              ) : (
+                <div className="aspect-square bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center border-2 border-orange-200">
+                  <div className="text-center">
+                    <div className="text-6xl mb-4">{getCategoryEmoji(product.category)}</div>
+                  </div>
+                </div>
+              )}
               
               {/* Información adicional */}
               <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">

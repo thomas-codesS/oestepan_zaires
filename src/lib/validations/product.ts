@@ -30,7 +30,11 @@ export const createProductSchema = z.object({
   stock_quantity: z.number()
     .int('La cantidad debe ser un número entero')
     .min(0, 'La cantidad no puede ser negativa')
-    .default(0)
+    .default(0),
+
+  image_url: z.string()
+    .url('Debe ser una URL válida')
+    .optional()
 })
 
 export const updateProductSchema = createProductSchema.partial().extend({
