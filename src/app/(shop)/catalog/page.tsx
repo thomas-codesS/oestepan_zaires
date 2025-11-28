@@ -206,8 +206,8 @@ export default function CatalogPage() {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
             <div className="mb-6 lg:mb-0">
               <div className="flex items-center space-x-3 mb-2">
-                <div className="text-3xl">🥖</div>
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+                <div className="text-2xl sm:text-3xl">🥖</div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
                   Catálogo Oeste Pan
                 </h1>
               </div>
@@ -389,8 +389,8 @@ export default function CatalogPage() {
                     const priceWithIVA = calculatePriceWithIVA(product.price, product.iva_rate)
                     
                     return (
-                      <div key={product.id} className="p-6 hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center justify-between">
+                      <div key={product.id} className="p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
                           {/* Info del producto */}
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center space-x-3 mb-2">
@@ -421,7 +421,7 @@ export default function CatalogPage() {
                           </div>
 
                           {/* Controles de cantidad y agregar */}
-                          <div className="flex items-center space-x-3 ml-4">
+                          <div className="flex items-center justify-between sm:justify-end space-x-3 w-full sm:w-auto mt-2 sm:mt-0 sm:ml-4">
                             <div className="flex items-center space-x-2">
                               <label htmlFor={`qty-${product.id}`} className="text-sm text-gray-600">
                                 Cant:

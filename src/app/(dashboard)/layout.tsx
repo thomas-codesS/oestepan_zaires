@@ -34,8 +34,8 @@ export default function DashboardLayout({
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center">
               <Link href={profile?.role === 'admin' ? '/admin/dashboard' : '/dashboard'}>
-                <h1 className="text-xl font-semibold text-gray-900 hover:text-orange-600 cursor-pointer">
-                  🥖 Oeste Pan {profile?.role === 'admin' ? '- Administración' : ''}
+                <h1 className="text-lg sm:text-xl font-semibold text-gray-900 hover:text-orange-600 cursor-pointer truncate">
+                  🥖 Oeste Pan <span className="hidden sm:inline">{profile?.role === 'admin' ? '- Administración' : ''}</span>
                 </h1>
               </Link>
             </div>

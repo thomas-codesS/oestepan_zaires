@@ -137,18 +137,19 @@ export default function CheckoutPage() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50">
       <div className="bg-white shadow-lg border-b border-orange-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
                 Confirmar Pedido
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 mt-1 text-sm sm:text-base">
                 Revisa tu pedido y completa los datos de entrega
               </p>
             </div>
             <Link href="/catalog">
-              <Button variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50">
-                ← Seguir Comprando
+              <Button variant="outline" className="w-full sm:w-auto border-orange-300 text-orange-600 hover:bg-orange-50">
+                <span className="hidden sm:inline">← Seguir Comprando</span>
+                <span className="sm:hidden">← Volver al Catálogo</span>
               </Button>
             </Link>
           </div>
@@ -340,7 +341,6 @@ export default function CheckoutPage() {
                 <li>• Los pedidos se preparan frescos diariamente</li>
                 <li>• Horarios de entrega: 8:00 - 18:00</li>
                 <li>• Para pedidos grandes, coordinaremos horario</li>
-                <li>• Recibirás confirmación por email</li>
               </ul>
             </div>
           </div>

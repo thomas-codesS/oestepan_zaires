@@ -38,42 +38,46 @@ export default function DashboardPage() {
       {/* Header con gradiente y mejores sombras */}
       <header className="bg-white shadow-lg border-b border-orange-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
                 Dashboard Principal
               </h1>
-              <p className="text-gray-600 mt-2 text-lg">
+              <p className="text-gray-600 mt-1 sm:mt-2 text-base sm:text-lg">
                 Bienvenido de nuevo, <span className="font-semibold text-gray-900">{profile?.full_name || user.email}</span>
               </p>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-end space-x-3 sm:space-x-4">
               {isAdmin() && (
                 <Link href="/admin/dashboard">
                   <Button 
                     variant="outline" 
+                    size="sm"
                     className="border-orange-300 text-orange-600 hover:bg-orange-50 transition-colors duration-200"
                   >
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    Panel Admin
+                    <BarChart3 className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Panel Admin</span>
+                    <span className="sm:hidden">Admin</span>
                   </Button>
                 </Link>
               )}
               <Button 
                 onClick={handleSignOut} 
                 variant="outline"
+                size="sm"
                 disabled={signingOut}
                 className="border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50"
               >
                 {signingOut ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
-                    Cerrando...
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 sm:mr-2"></div>
+                    <span className="hidden sm:inline">Cerrando...</span>
                   </>
                 ) : (
                   <>
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Cerrar Sesión
+                    <LogOut className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Cerrar Sesión</span>
+                    <span className="sm:hidden">Salir</span>
                   </>
                 )}
               </Button>

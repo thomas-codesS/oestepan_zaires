@@ -114,24 +114,26 @@ export default function OrdersPage() {
       {/* Header */}
       <div className="bg-white shadow-lg border-b border-orange-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
                 Mis Pedidos
               </h1>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 mt-1 text-sm sm:text-base">
                 Historial y seguimiento de tus pedidos
               </p>
             </div>
-            <div className="flex space-x-4">
-              <Link href="/catalog">
-                <Button className="bg-orange-600 hover:bg-orange-700 text-white">
-                  Hacer Nuevo Pedido
+            <div className="flex space-x-3 sm:space-x-4">
+              <Link href="/catalog" className="flex-1 sm:flex-none">
+                <Button className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white">
+                  <span className="hidden sm:inline">Hacer Nuevo Pedido</span>
+                  <span className="sm:hidden">+ Nuevo Pedido</span>
                 </Button>
               </Link>
               <Link href="/dashboard">
                 <Button variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50">
-                  ← Dashboard
+                  <span className="hidden sm:inline">← Dashboard</span>
+                  <span className="sm:hidden">← Volver</span>
                 </Button>
               </Link>
             </div>
@@ -258,11 +260,11 @@ export default function OrdersPage() {
               {orders.map((order) => {
                 const statusConfig = getOrderStatusConfig(order.status)
                 return (
-                  <div key={order.id} className="p-6 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-4">
+                  <div key={order.id} className="p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2 sm:gap-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 gap-2 sm:gap-0">
                         <div>
-                          <h3 className="font-semibold text-gray-900">
+                          <h3 className="font-semibold text-gray-900 text-lg sm:text-base">
                             Pedido #{order.id.slice(-8).toUpperCase()}
                           </h3>
                           <p className="text-sm text-gray-600 flex items-center mt-1">
@@ -270,12 +272,14 @@ export default function OrdersPage() {
                             {formatDate(order.created_at)}
                           </p>
                         </div>
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusConfig.bgColor} ${statusConfig.textColor} ${statusConfig.borderColor} border`}>
-                          {statusConfig.label}
-                        </span>
+                        <div className="flex">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusConfig.bgColor} ${statusConfig.textColor} ${statusConfig.borderColor} border`}>
+                            {statusConfig.label}
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-orange-600">
+                      <div className="text-left sm:text-right mt-2 sm:mt-0">
+                        <div className="text-xl sm:text-lg font-bold text-orange-600">
                           {formatPrice(order.total_amount)}
                         </div>
                         <p className="text-sm text-gray-500">

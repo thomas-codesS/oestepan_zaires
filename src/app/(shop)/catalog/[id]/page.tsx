@@ -171,19 +171,22 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       {/* Header con navegación */}
       <div className="bg-white shadow-lg border-b border-orange-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <Link href="/catalog">
-              <Button 
-                variant="outline" 
-                className="border-orange-300 text-orange-600 hover:bg-orange-50"
-              >
-                ← Volver al Catálogo
-              </Button>
-            </Link>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+            <div className="w-full sm:w-auto flex justify-start">
+              <Link href="/catalog">
+                <Button 
+                  variant="outline" 
+                  className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                >
+                  <span className="sm:hidden">← Volver</span>
+                  <span className="hidden sm:inline">← Volver al Catálogo</span>
+                </Button>
+              </Link>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent text-center">
               Detalle del Producto
             </h1>
-            <div></div> {/* Spacer for flex layout */}
+            <div className="hidden sm:block w-[140px]"></div> {/* Spacer for flex layout */}
           </div>
         </div>
       </div>
