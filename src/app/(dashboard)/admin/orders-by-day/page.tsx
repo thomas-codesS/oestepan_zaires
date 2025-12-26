@@ -269,8 +269,9 @@ export default function OrdersByDayPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                📅 Fecha Inicio
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                <Calendar className="w-4 h-4 mr-1" />
+                Fecha Inicio
               </label>
               <Input
                 type="date"
@@ -281,8 +282,9 @@ export default function OrdersByDayPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                📅 Fecha Fin
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                <Calendar className="w-4 h-4 mr-1" />
+                Fecha Fin
               </label>
               <Input
                 type="date"
@@ -293,8 +295,9 @@ export default function OrdersByDayPage() {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                🔍 Buscar Cliente o Dirección
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                <Search className="w-4 h-4 mr-1" />
+                Buscar Cliente o Dirección
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -380,7 +383,7 @@ export default function OrdersByDayPage() {
                     <Calendar className="h-6 w-6 sm:h-6 sm:w-6 text-white flex-shrink-0" />
                     <div>
                       <span className="text-lg sm:text-xl font-bold block">
-                        📅 {new Date(day.delivery_date).toLocaleDateString('es-AR', {
+                        {new Date(day.delivery_date).toLocaleDateString('es-AR', {
                           weekday: 'long',
                           year: 'numeric',
                           month: 'long',
@@ -477,7 +480,7 @@ export default function OrdersByDayPage() {
                           <User className="h-5 w-5 flex-shrink-0 mt-1 sm:mt-0" />
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                              <span className="font-bold text-base sm:text-lg">👤 {client.client_name}</span>
+                              <span className="font-bold text-base sm:text-lg">{client.client_name}</span>
                               <span className="text-xs sm:text-sm opacity-90 break-all">({client.client_email})</span>
                             </div>
                           </div>
@@ -544,9 +547,10 @@ export default function OrdersByDayPage() {
                               <Button
                                 size="sm"
                                 onClick={() => handleStatusChange(order.id, 'delivered')}
-                                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm"
+                                className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm flex items-center justify-center"
                               >
-                                ✓ Entregar
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Entregar
                               </Button>
                             )}
 
@@ -580,7 +584,9 @@ export default function OrdersByDayPage() {
 
         {filteredOrders.length === 0 && !loading && (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">📅</div>
+            <div className="flex justify-center mb-4">
+              <Calendar className="w-16 h-16 text-gray-300" />
+            </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               No hay pedidos para mostrar
             </h3>

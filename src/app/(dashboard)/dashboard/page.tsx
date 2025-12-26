@@ -189,7 +189,7 @@ export default function DashboardPage() {
           <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl shadow-lg p-8 mb-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🥖</span>
+                <Package className="w-8 h-8 text-orange-600" />
               </div>
               <h3 className="text-2xl font-bold text-orange-900 mb-3">
                 ¡Bienvenido a Oeste Pan!

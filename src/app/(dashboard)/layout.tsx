@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { LogOut, User, Menu, X } from 'lucide-react'
+import { LogOut, User, Menu, X, Package, Home, ShoppingCart, BarChart3, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth/auth-context'
 import { Button } from '@/components/ui/button'
@@ -37,7 +37,7 @@ export default function DashboardLayout({
             <div className="flex items-center">
               <Link href={profile?.role === 'admin' ? '/admin/dashboard' : '/dashboard'}>
                 <h1 className="text-lg sm:text-xl font-semibold text-gray-900 hover:text-orange-600 cursor-pointer flex items-center gap-2">
-                  <span className="text-2xl">🥖</span>
+                  <Package className="w-6 h-6 text-orange-600" />
                   <span>Oeste Pan</span>
                   {profile?.role === 'admin' && (
                     <span className="hidden md:inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
@@ -156,30 +156,34 @@ export default function DashboardLayout({
                   <Link
                     href="/admin/dashboard"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 flex items-center"
                   >
-                    📊 Dashboard
+                    <BarChart3 className="w-5 h-5 mr-2" />
+                    Dashboard
                   </Link>
                   <Link
                     href="/admin/products"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 flex items-center"
                   >
-                    📦 Productos
+                    <Package className="w-5 h-5 mr-2" />
+                    Productos
                   </Link>
                   <Link
                     href="/admin/orders"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 flex items-center"
                   >
-                    🛒 Pedidos
+                    <ShoppingCart className="w-5 h-5 mr-2" />
+                    Pedidos
                   </Link>
                   <Link
                     href="/admin/orders-by-day"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 flex items-center"
                   >
-                    📅 Pedidos por Día
+                    <Calendar className="w-5 h-5 mr-2" />
+                    Pedidos por Día
                   </Link>
                 </>
               ) : (
@@ -187,23 +191,26 @@ export default function DashboardLayout({
                   <Link
                     href="/dashboard"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 flex items-center"
                   >
-                    🏠 Inicio
+                    <Home className="w-5 h-5 mr-2" />
+                    Inicio
                   </Link>
                   <Link
                     href="/catalog"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 flex items-center"
                   >
-                    📦 Catálogo
+                    <Package className="w-5 h-5 mr-2" />
+                    Catálogo
                   </Link>
                   <Link
                     href="/orders"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50"
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-orange-600 hover:bg-orange-50 flex items-center"
                   >
-                    🛒 Mis Pedidos
+                    <ShoppingCart className="w-5 h-5 mr-2" />
+                    Mis Pedidos
                   </Link>
                 </>
               )}

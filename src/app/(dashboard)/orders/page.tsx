@@ -13,7 +13,7 @@ import {
   OrderStatus,
   getOrderStatusConfig 
 } from '@/lib/types/order'
-import { ChevronLeft, ChevronRight, Search, Eye, Calendar, Package } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search, Eye, Calendar, Package, MapPin, Phone, BarChart3 } from 'lucide-react'
 
 export default function OrdersPage() {
   const router = useRouter()
@@ -152,8 +152,9 @@ export default function OrdersPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Búsqueda por texto */}
             <div className="sm:col-span-2 lg:col-span-1">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                🔍 Buscar
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                <Search className="w-4 h-4 mr-1" />
+                Buscar
               </label>
               <Input
                 type="text"
@@ -166,8 +167,9 @@ export default function OrdersPage() {
 
             {/* Estado */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                📊 Estado
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                <BarChart3 className="w-4 h-4 mr-1" />
+                Estado
               </label>
               <select
                 value={filters.status}
@@ -186,8 +188,9 @@ export default function OrdersPage() {
 
             {/* Fecha desde */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                📅 Desde
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                <Calendar className="w-4 h-4 mr-1" />
+                Desde
               </label>
               <Input
                 type="date"
@@ -199,8 +202,9 @@ export default function OrdersPage() {
 
             {/* Fecha hasta */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                📅 Hasta
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                <Calendar className="w-4 h-4 mr-1" />
+                Hasta
               </label>
               <Input
                 type="date"
@@ -309,19 +313,28 @@ export default function OrdersPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-4">
                       {order.delivery_date && (
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0">
-                          <span className="font-medium">📅 Entrega: </span>
+                          <span className="font-medium flex items-center">
+                            <Calendar className="w-4 h-4 mr-1" />
+                            Entrega:
+                          </span>
                           <span className="sm:ml-1">{formatDate(order.delivery_date)}</span>
                         </div>
                       )}
                       {order.delivery_address && (
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0 sm:col-span-2 md:col-span-1">
-                          <span className="font-medium">📍 Dirección: </span>
+                          <span className="font-medium flex items-center">
+                            <MapPin className="w-4 h-4 mr-1" />
+                            Dirección:
+                          </span>
                           <span className="sm:ml-1 break-words">{order.delivery_address}</span>
                         </div>
                       )}
                       {order.phone && (
                         <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0">
-                          <span className="font-medium">📞 Teléfono: </span>
+                          <span className="font-medium flex items-center">
+                            <Phone className="w-4 h-4 mr-1" />
+                            Teléfono:
+                          </span>
                           <span className="sm:ml-1">{order.phone}</span>
                         </div>
                       )}
