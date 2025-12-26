@@ -112,6 +112,7 @@ export function ProductForm({ product, onSubmit, isLoading = false, onCancel }: 
   }
 
   const categoryOptions = [
+    { value: 'Panes Precocidos Congelados', label: 'Panes Precocidos Congelados' },
     { value: 'panaderia', label: 'Panadería' },
     { value: 'bolleria', label: 'Bollería' },
     { value: 'pasteleria', label: 'Pastelería' },

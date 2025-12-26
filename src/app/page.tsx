@@ -82,10 +82,10 @@ export default function Home() {
               <div className="space-y-8">
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-black leading-tight text-balance">
                   Fabricacion artesanal,
-                  <span className="block text-amber-800">cada día.</span>
+                  <span className="block text-amber-800">cada día dia a dia</span>
                 </h1>
                 <p className="text-xl lg:text-2xl text-gray-700 leading-relaxed text-pretty max-w-lg">
-                  Somos una empresa familiar con más de 20 años de experiencia en panificados.
+                  Somos una empresa familiar con más de 25 años de experiencia en panificados.
                   Trabajamos con pasión, compromiso y responsabilidad ofreciendo diariamente productos de alta calidad y máxima frescura.
                 </p>
               </div>
@@ -165,7 +165,7 @@ export default function Home() {
             {[
               {
                 image: "/imagenes_stock_paginaprincipal/panes_crudos.jpeg",
-                title: "Pan Crudos",
+                title: "Panes Congelados y Refrigerados",
                 description:
                   "Panes tradicionales con ingredientes naturales de primera calidad. Elaborados con técnicas artesanales transmitidas de generación en generación.",
               },
@@ -235,7 +235,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="absolute -bottom-8 -right-8 bg-black text-white p-8 lg:p-10 rounded-3xl shadow-2xl animate-float">
-                <p className="text-4xl lg:text-5xl font-bold">20+</p>
+                <p className="text-4xl lg:text-5xl font-bold">+25</p>
                 <p className="text-gray-300 font-medium text-lg lg:text-xl">Años de tradición</p>
               </div>
             </div>
@@ -317,7 +317,6 @@ export default function Home() {
                   { day: "Lunes a Viernes", hours: "08:00 - 16:00" },
                   { day: "Sábados", hours: "Cerrado" },
                   { day: "Domingos", hours: "Cerrado" },
-                  { day: "Feriados", hours: "Entregando" },
                 ].map((schedule, index) => (
                   <div
                     key={index}
@@ -465,7 +464,6 @@ export default function Home() {
                   <div className="text-base space-y-2">
                     <p>Administración - Lunes a Viernes: 08:00 - 16:00</p>
                     <p>Sábados y Domingos: Cerrado</p>
-                    <p>Feriados: Entregando</p>
                   </div>
                 </div>
               </div>

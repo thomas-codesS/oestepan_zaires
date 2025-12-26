@@ -142,42 +142,42 @@ export default function OrdersPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Filtros */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-orange-100 mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        {/* Filtros - Mobile First */}
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 border border-orange-100 mb-8">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <Search className="h-5 w-5 text-orange-500 mr-2" />
             Filtros de Búsqueda
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Búsqueda por texto */}
-            <div>
+            <div className="sm:col-span-2 lg:col-span-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Buscar
+                🔍 Buscar
               </label>
               <Input
                 type="text"
-                placeholder="Número de pedido, producto..."
+                placeholder="Número de pedido..."
                 value={filters.search}
                 onChange={(e) => handleFilterChange('search', e.target.value)}
-                className="border-orange-200 focus:border-orange-400 focus:ring-orange-200"
+                className="border-orange-200 focus:border-orange-400 focus:ring-orange-200 text-sm sm:text-base"
               />
             </div>
 
             {/* Estado */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Estado
+                📊 Estado
               </label>
               <select
                 value={filters.status}
                 onChange={(e) => handleFilterChange('status', e.target.value)}
-                className="w-full p-2 border border-orange-200 rounded-lg focus:border-orange-400 focus:ring-orange-200"
+                className="w-full p-2 text-sm sm:text-base border border-orange-200 rounded-lg focus:border-orange-400 focus:ring-orange-200"
               >
-                <option value="">Todos los estados</option>
+                <option value="">Todos</option>
                 <option value="pending">Pendiente</option>
                 <option value="confirmed">Confirmado</option>
-                <option value="preparing">En Preparación</option>
+                <option value="preparing">Preparando</option>
                 <option value="ready">Listo</option>
                 <option value="delivered">Entregado</option>
                 <option value="cancelled">Cancelado</option>
@@ -187,38 +187,39 @@ export default function OrdersPage() {
             {/* Fecha desde */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Desde
+                📅 Desde
               </label>
               <Input
                 type="date"
                 value={filters.dateFrom}
                 onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
-                className="border-orange-200 focus:border-orange-400 focus:ring-orange-200"
+                className="border-orange-200 focus:border-orange-400 focus:ring-orange-200 text-sm sm:text-base"
               />
             </div>
 
             {/* Fecha hasta */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Hasta
+                📅 Hasta
               </label>
               <Input
                 type="date"
                 value={filters.dateTo}
                 onChange={(e) => handleFilterChange('dateTo', e.target.value)}
-                className="border-orange-200 focus:border-orange-400 focus:ring-orange-200"
+                className="border-orange-200 focus:border-orange-400 focus:ring-orange-200 text-sm sm:text-base"
               />
             </div>
           </div>
 
           <div className="flex justify-end mt-4">
-            <Button 
+            <Button
               onClick={() => {
                 setFilters({ status: '', search: '', dateFrom: '', dateTo: '' })
                 setCurrentPage(1)
               }}
               variant="outline"
-              className="border-gray-300 text-gray-600 hover:bg-gray-50"
+              size="sm"
+              className="w-full sm:w-auto border-gray-300 text-gray-600 hover:bg-gray-50 text-sm"
             >
               Limpiar Filtros
             </Button>
@@ -304,38 +305,39 @@ export default function OrdersPage() {
                       </div>
                     </div>
 
-                    {/* Información adicional */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 mb-4">
+                    {/* Información adicional - Mobile First */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-4">
                       {order.delivery_date && (
-                        <div>
-                          <span className="font-medium">Entrega: </span>
-                          {formatDate(order.delivery_date)}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0">
+                          <span className="font-medium">📅 Entrega: </span>
+                          <span className="sm:ml-1">{formatDate(order.delivery_date)}</span>
                         </div>
                       )}
                       {order.delivery_address && (
-                        <div>
-                          <span className="font-medium">Dirección: </span>
-                          {order.delivery_address}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0 sm:col-span-2 md:col-span-1">
+                          <span className="font-medium">📍 Dirección: </span>
+                          <span className="sm:ml-1 break-words">{order.delivery_address}</span>
                         </div>
                       )}
                       {order.phone && (
-                        <div>
-                          <span className="font-medium">Teléfono: </span>
-                          {order.phone}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0">
+                          <span className="font-medium">📞 Teléfono: </span>
+                          <span className="sm:ml-1">{order.phone}</span>
                         </div>
                       )}
                     </div>
 
-                    {/* Acciones */}
-                    <div className="flex justify-between items-center">
-                      <div className="text-xs text-gray-500">
+                    {/* Acciones - Mobile First */}
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+                      <div className="text-xs sm:text-sm text-gray-500">
                         {statusConfig.description}
                       </div>
                       <div className="flex space-x-2">
-                        <Link href={`/orders/${order.id}`}>
-                          <Button variant="outline" size="sm" className="border-orange-300 text-orange-600 hover:bg-orange-50">
+                        <Link href={`/orders/${order.id}`} className="flex-1 sm:flex-none">
+                          <Button variant="outline" size="sm" className="w-full sm:w-auto border-orange-300 text-orange-600 hover:bg-orange-50">
                             <Eye className="h-4 w-4 mr-1" />
-                            Ver Detalles
+                            <span className="hidden sm:inline">Ver Detalles</span>
+                            <span className="sm:hidden">Ver Detalle</span>
                           </Button>
                         </Link>
                       </div>
@@ -346,31 +348,31 @@ export default function OrdersPage() {
             </div>
           )}
 
-          {/* Paginación */}
+          {/* Paginación - Mobile First */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200">
-              <div className="text-sm text-gray-600">
+            <div className="flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-4 border-t border-gray-200 gap-3 sm:gap-0">
+              <div className="text-xs sm:text-sm text-gray-600">
                 Página {currentPage} de {totalPages}
               </div>
-              <div className="flex space-x-2">
+              <div className="flex space-x-2 w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="border-orange-300 text-orange-600 hover:bg-orange-50 disabled:opacity-50"
+                  className="flex-1 sm:flex-none border-orange-300 text-orange-600 hover:bg-orange-50 disabled:opacity-50 text-xs sm:text-sm"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  Anterior
+                  <span className="hidden sm:inline ml-1">Anterior</span>
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="border-orange-300 text-orange-600 hover:bg-orange-50 disabled:opacity-50"
+                  className="flex-1 sm:flex-none border-orange-300 text-orange-600 hover:bg-orange-50 disabled:opacity-50 text-xs sm:text-sm"
                 >
-                  Siguiente
+                  <span className="hidden sm:inline mr-1">Siguiente</span>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>

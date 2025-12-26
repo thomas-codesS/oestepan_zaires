@@ -102,23 +102,23 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600 font-medium">Email:</span>
-                <span className="text-gray-900 font-semibold text-sm">{user.email}</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                <span className="text-gray-600 font-medium text-sm">Email:</span>
+                <span className="text-gray-900 font-semibold text-sm break-all">{user.email}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 font-medium">Nombre:</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                <span className="text-gray-600 font-medium text-sm">Nombre:</span>
                 <span className="text-gray-900 font-semibold text-sm">{profile?.full_name || 'No especificado'}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 font-medium">Empresa:</span>
-                <span className="text-gray-900 font-semibold text-sm">{profile?.company_name || 'No especificada'}</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0">
+                <span className="text-gray-600 font-medium text-sm">Empresa:</span>
+                <span className="text-gray-900 font-semibold text-sm break-words">{profile?.company_name || 'No especificada'}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 font-medium">Rol:</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-0 items-start sm:items-center">
+                <span className="text-gray-600 font-medium text-sm">Rol:</span>
                 <span className={`font-semibold text-sm px-2 py-1 rounded-full ${
-                  profile?.role === 'admin' 
-                    ? 'bg-blue-100 text-blue-800' 
+                  profile?.role === 'admin'
+                    ? 'bg-blue-100 text-blue-800'
                     : 'bg-green-100 text-green-800'
                 }`}>
                   {profile?.role === 'admin' ? 'Administrador' : 'Cliente'}
@@ -147,7 +147,7 @@ export default function DashboardPage() {
                 <Package className="w-5 h-5 text-orange-600" />
               </div>
             </div>
-            <p className="text-gray-600 mb-6 leading-relaxed">
+            <p className="text-gray-600 mb-6 leading-relaxed text-sm sm:text-base">
               Explora nuestros productos frescos de panadería y pastelería
             </p>
             <Link href="/catalog">
@@ -169,7 +169,7 @@ export default function DashboardPage() {
                 <ShoppingCart className="w-5 h-5 text-orange-600" />
               </div>
             </div>
-            <p className="text-gray-600 mb-6 leading-relaxed">
+            <p className="text-gray-600 mb-6 leading-relaxed text-sm sm:text-base">
               Revisa el historial y estado de todos tus pedidos
             </p>
             <Link href="/orders">
