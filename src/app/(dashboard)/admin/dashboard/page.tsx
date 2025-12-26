@@ -234,66 +234,66 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* Métricas principales */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Métricas principales - Mobile First */}
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8">
           {/* Total de Pedidos */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-orange-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Pedidos</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.totalOrders || 0}</p>
-                <div className="flex items-center mt-2">
-                  <ArrowUpRight className="w-4 h-4 text-green-500 mr-1" />
-                  <span className="text-sm text-green-600">+{stats?.weeklyGrowth || 0}% esta semana</span>
+          <div className="bg-white rounded-xl shadow-lg p-3 sm:p-6 border border-orange-100">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Total Pedidos</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 truncate">{stats?.totalOrders || 0}</p>
+                <div className="flex items-center mt-1 sm:mt-2">
+                  <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 mr-1" />
+                  <span className="text-xs sm:text-sm text-green-600">+{stats?.weeklyGrowth || 0}% semana</span>
                 </div>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <ShoppingCart className="w-6 h-6 text-blue-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
               </div>
             </div>
           </div>
 
           {/* Ingresos Totales */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-orange-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Ingresos Totales</p>
-                <p className="text-2xl font-bold text-gray-900">{formatPrice(stats?.totalRevenue || 0)}</p>
-                <div className="flex items-center mt-2">
-                  <ArrowUpRight className="w-4 h-4 text-green-500 mr-1" />
-                  <span className="text-sm text-green-600">+{stats?.monthlyGrowth || 0}% este mes</span>
+          <div className="bg-white rounded-xl shadow-lg p-3 sm:p-6 border border-orange-100 col-span-2 sm:col-span-1">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Ingresos</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900 truncate">{formatPrice(stats?.totalRevenue || 0)}</p>
+                <div className="flex items-center mt-1 sm:mt-2">
+                  <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 mr-1" />
+                  <span className="text-xs sm:text-sm text-green-600">+{stats?.monthlyGrowth || 0}% mes</span>
                 </div>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-green-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
               </div>
             </div>
           </div>
 
           {/* Productos Activos */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-orange-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Productos Activos</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.activeProducts || 0}</p>
-                <p className="text-sm text-gray-500 mt-2">de {stats?.totalProducts || 0} total</p>
+          <div className="bg-white rounded-xl shadow-lg p-3 sm:p-6 border border-orange-100">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Productos</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats?.activeProducts || 0}</p>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">de {stats?.totalProducts || 0}</p>
               </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                <Package className="w-6 h-6 text-orange-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Package className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
               </div>
             </div>
           </div>
 
           {/* Clientes Totales */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-orange-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Clientes Totales</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.totalClients || 0}</p>
-                <p className="text-sm text-gray-500 mt-2">{stats?.todayOrders || 0} pedidos hoy</p>
+          <div className="bg-white rounded-xl shadow-lg p-3 sm:p-6 border border-orange-100">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1">Clientes</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats?.totalClients || 0}</p>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 sm:mt-2">{stats?.todayOrders || 0} hoy</p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <Users className="w-6 h-6 text-purple-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
               </div>
             </div>
           </div>
@@ -327,53 +327,53 @@ export default function AdminDashboardPage() {
             <h2 className="text-xl font-bold text-gray-900 mb-6">
               Acciones Rápidas
             </h2>
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
               <Link href="/admin/products">
-                <Button 
-                  variant="outline" 
-                  className="w-full h-16 flex flex-col items-center justify-center border-orange-200 hover:bg-orange-50"
+                <Button
+                  variant="outline"
+                  className="w-full h-14 sm:h-16 flex flex-col items-center justify-center border-orange-200 hover:bg-orange-50"
                 >
-                  <Package className="w-6 h-6 text-orange-600 mb-1" />
-                  <span className="text-sm">Gestionar Productos</span>
+                  <Package className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600 mb-1" />
+                  <span className="text-xs sm:text-sm">Productos</span>
                 </Button>
               </Link>
-              
+
               <Link href="/admin/orders">
-                <Button 
-                  variant="outline" 
-                  className="w-full h-16 flex flex-col items-center justify-center border-orange-200 hover:bg-orange-50"
+                <Button
+                  variant="outline"
+                  className="w-full h-14 sm:h-16 flex flex-col items-center justify-center border-orange-200 hover:bg-orange-50"
                 >
-                  <ShoppingCart className="w-6 h-6 text-orange-600 mb-1" />
-                  <span className="text-sm">Ver Pedidos</span>
+                  <ShoppingCart className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600 mb-1" />
+                  <span className="text-xs sm:text-sm">Pedidos</span>
                 </Button>
               </Link>
-              
+
               <Link href="/admin/orders-by-day">
-                <Button 
-                  variant="outline" 
-                  className="w-full h-16 flex flex-col items-center justify-center border-blue-200 hover:bg-blue-50"
+                <Button
+                  variant="outline"
+                  className="w-full h-14 sm:h-16 flex flex-col items-center justify-center border-blue-200 hover:bg-blue-50"
                 >
-                  <Calendar className="w-6 h-6 text-blue-600 mb-1" />
-                  <span className="text-sm">Pedidos por Día</span>
+                  <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 mb-1" />
+                  <span className="text-xs sm:text-sm">Por Día</span>
                 </Button>
               </Link>
-              
-              <Link href="/admin/products/new">
-                <Button 
-                  className="w-full h-16 flex flex-col items-center justify-center bg-orange-600 hover:bg-orange-700"
+
+              <Link href="/admin/products/new" className="col-span-2 sm:col-span-1">
+                <Button
+                  className="w-full h-14 sm:h-16 flex flex-col items-center justify-center bg-orange-600 hover:bg-orange-700"
                 >
-                  <Package className="w-6 h-6 text-white mb-1" />
-                  <span className="text-sm text-white">Nuevo Producto</span>
+                  <Package className="w-5 h-5 sm:w-6 sm:h-6 text-white mb-1" />
+                  <span className="text-xs sm:text-sm text-white">Nuevo</span>
                 </Button>
               </Link>
-              
-              <Link href="/admin/reports">
-                <Button 
-                  variant="outline" 
-                  className="w-full h-16 flex flex-col items-center justify-center border-orange-200 hover:bg-orange-50"
+
+              <Link href="/admin/reports" className="col-span-2 sm:col-span-1">
+                <Button
+                  variant="outline"
+                  className="w-full h-14 sm:h-16 flex flex-col items-center justify-center border-orange-200 hover:bg-orange-50"
                 >
-                  <BarChart3 className="w-6 h-6 text-orange-600 mb-1" />
-                  <span className="text-sm">Reportes</span>
+                  <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600 mb-1" />
+                  <span className="text-xs sm:text-sm">Reportes</span>
                 </Button>
               </Link>
             </div>

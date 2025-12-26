@@ -269,35 +269,41 @@ export default function CheckoutPage() {
 
             <div className="space-y-4">
               {items.map((item) => (
-                <div key={item.product.id} className="flex justify-between items-start pb-4 border-b border-gray-100">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{item.product.name}</h3>
-                    <p className="text-sm text-gray-600 line-clamp-2">{item.product.description}</p>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-sm text-gray-500">
-                        Cantidad: {item.quantity}
+                <div key={item.product.id} className="pb-4 border-b border-gray-100">
+                  <div className="flex flex-col space-y-3">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{item.product.name}</h3>
+                      <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mt-1">{item.product.description}</p>
+                      <p className="text-sm font-medium text-orange-600 mt-1">
+                        {formatPrice(item.product.price_with_iva)} c/u
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs sm:text-sm text-gray-500 font-medium">
+                        Subtotal: {formatPrice(item.product.price_with_iva * item.quantity)}
                       </span>
-                      
+
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                          className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors"
+                          className="w-9 h-9 sm:w-8 sm:h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors text-lg font-bold"
                           disabled={item.quantity <= 1}
                         >
                           −
                         </button>
-                        <span className="min-w-[2rem] text-center font-medium">
+                        <span className="min-w-[2.5rem] text-center font-bold text-base sm:text-sm">
                           {item.quantity}
                         </span>
                         <button
                           onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                          className="w-8 h-8 rounded-full bg-orange-100 hover:bg-orange-200 flex items-center justify-center text-orange-600 transition-colors"
+                          className="w-9 h-9 sm:w-8 sm:h-8 rounded-full bg-orange-100 hover:bg-orange-200 flex items-center justify-center text-orange-600 transition-colors text-lg font-bold"
                         >
                           +
                         </button>
                         <button
                           onClick={() => removeItem(item.product.id)}
-                          className="w-8 h-8 rounded-full bg-red-100 hover:bg-red-200 flex items-center justify-center text-red-600 transition-colors ml-2"
+                          className="w-9 h-9 sm:w-8 sm:h-8 rounded-full bg-red-100 hover:bg-red-200 flex items-center justify-center text-red-600 transition-colors ml-2 text-xl font-bold"
                           title="Eliminar producto"
                         >
                           ×
@@ -335,9 +341,9 @@ export default function CheckoutPage() {
               </p>
             </div>
 
-            <div className="mt-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
-              <h3 className="font-semibold text-orange-800 mb-2">ℹ️ Información Importante</h3>
-              <ul className="text-sm text-orange-700 space-y-1">
+            <div className="mt-6 p-3 sm:p-4 bg-orange-50 rounded-lg border border-orange-200">
+              <h3 className="font-semibold text-orange-800 mb-2 text-sm sm:text-base">ℹ️ Información Importante</h3>
+              <ul className="text-xs sm:text-sm text-orange-700 space-y-1">
                 <li>• Los pedidos se preparan frescos diariamente</li>
                 <li>• Horarios de entrega: 8:00 - 18:00</li>
                 <li>• Para pedidos grandes, coordinaremos horario</li>
