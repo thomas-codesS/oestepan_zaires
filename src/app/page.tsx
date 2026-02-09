@@ -113,33 +113,45 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-6">
                   <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-all duration-500 hover:shadow-3xl">
-                    <img
+                    <Image
                       src="/imagenes_stock_paginaprincipal/panes.jpeg"
                       alt="Pan recién horneado"
+                      width={400}
+                      height={192}
                       className="w-full h-48 object-cover"
+                      loading="eager"
                     />
                   </div>
                   <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-all duration-500 hover:shadow-3xl">
-                    <img
+                    <Image
                       src="/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.10 PM (3).jpeg"
                       alt="Panadería artesanal"
+                      width={400}
+                      height={256}
                       className="w-full h-64 object-cover"
+                      loading="lazy"
                     />
                   </div>
                 </div>
                 <div className="space-y-6 pt-12">
                   <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-all duration-500 hover:shadow-3xl">
-                    <img
+                    <Image
                       src="/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.11 PM (1).jpeg"
                       alt="Pastafrolas y dulces artesanales"
+                      width={400}
+                      height={256}
                       className="w-full h-64 object-cover"
+                      loading="lazy"
                     />
                   </div>
                   <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform hover:scale-105 transition-all duration-500 hover:shadow-3xl">
-                    <img
+                    <Image
                       src="/imagenes_stock_paginaprincipal/medialuna.jpeg"
                       alt="Medialunas"
+                      width={400}
+                      height={192}
                       className="w-full h-48 object-cover"
+                      loading="lazy"
                     />
                   </div>
                 </div>
@@ -187,11 +199,14 @@ export default function Home() {
                 className="group bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-3xl transition-all duration-500 transform hover:-translate-y-3 animate-fade-in-up"
                 style={{ animationDelay: `${index * 200}ms` }}
               >
-                <div className="overflow-hidden">
-                  <img
-                    src={product.image || "/placeholder.svg"}
+                <div className="overflow-hidden relative h-72">
+                  <Image
+                    src={product.image}
                     alt={product.title}
-                    className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    loading="lazy"
                   />
                 </div>
                 <div className="p-10 space-y-6">
@@ -210,28 +225,48 @@ export default function Home() {
             <div className="relative order-2 lg:order-1">
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-6">
-                  <img
-                    src="/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.14 PM.jpeg"
-                    alt="Panadería tradicional"
-                    className="w-full h-48 object-cover rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
-                  />
-                  <img
-                    src="/imagenes_stock_paginaprincipal/pan_hamburguesa.jpg"
-                    alt="Panes para hamburguesas"
-                    className="w-full h-64 object-cover rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
-                  />
+                  <div className="relative h-48 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 overflow-hidden">
+                    <Image
+                      src="/imagenes_stock_paginaprincipal/WhatsApp Image 2025-10-09 at 2.59.14 PM.jpeg"
+                      alt="Panadería tradicional"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 50vw, 25vw"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="relative h-64 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 overflow-hidden">
+                    <Image
+                      src="/imagenes_stock_paginaprincipal/pan_hamburguesa.jpg"
+                      alt="Panes para hamburguesas"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 50vw, 25vw"
+                      loading="lazy"
+                    />
+                  </div>
                 </div>
                 <div className="space-y-6 pt-12">
-                  <img
-                    src="/imagenes_stock_paginaprincipal/facturas landing.jpg"
-                    alt="Facturas artesanales"
-                    className="w-full h-64 object-cover rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
-                  />
-                  <img
-                    src="/imagenes_stock_paginaprincipal/prepizza.jpg"
-                    alt="Prepizzas artesanales"
-                    className="w-full h-48 object-cover rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
-                  />
+                  <div className="relative h-64 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 overflow-hidden">
+                    <Image
+                      src="/imagenes_stock_paginaprincipal/facturas landing.jpg"
+                      alt="Facturas artesanales"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 50vw, 25vw"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="relative h-48 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 overflow-hidden">
+                    <Image
+                      src="/imagenes_stock_paginaprincipal/prepizza.jpg"
+                      alt="Prepizzas artesanales"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 50vw, 25vw"
+                      loading="lazy"
+                    />
+                  </div>
                 </div>
               </div>
               <div className="absolute -bottom-8 -right-8 bg-black text-white p-8 lg:p-10 rounded-3xl shadow-2xl animate-float">
@@ -268,6 +303,53 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Sección Lista de Precios PDF */}
+      <section className="py-20 lg:py-24 bg-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12 space-y-6">
+            <h2 className="text-4xl lg:text-5xl font-bold text-black text-balance">📋 Lista de Precios</h2>
+            <p className="text-xl lg:text-2xl text-gray-600 text-pretty">
+              Consultá nuestra lista actualizada con todos los productos y precios
+            </p>
+          </div>
+          <div className="bg-gray-50 rounded-3xl shadow-xl p-6 lg:p-10 border border-gray-200">
+            <div className="rounded-2xl overflow-hidden border border-gray-300 mb-8" style={{ height: '600px' }}>
+              <iframe
+                src="/pdf/Lista%20Oeste%20Pan%20DICIEMBRE.pdf"
+                className="w-full h-full"
+                title="Lista de Precios Oeste Pan Diciembre"
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="/pdf/Lista%20Oeste%20Pan%20DICIEMBRE.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto bg-black hover:bg-gray-800 text-white px-10 py-5 text-xl font-bold shadow-2xl transition-all duration-300"
+                >
+                  Ver PDF Completo
+                </Button>
+              </a>
+              <a
+                href="/pdf/Lista%20Oeste%20Pan%20DICIEMBRE.pdf"
+                download
+              >
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto border-3 border-black text-black hover:bg-black hover:text-white px-10 py-5 text-xl font-bold bg-transparent transition-all duration-300"
+                >
+                  Descargar PDF
+                </Button>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="py-20 lg:py-32 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20 space-y-6">
@@ -289,10 +371,13 @@ export default function Home() {
                 className="group relative overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 animate-fade-in-up"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
-                <img
-                  src={src || "/placeholder.svg"}
+                <Image
+                  src={src}
                   alt={`Imagen ${index + 1} de la panadería`}
+                  width={400}
+                  height={256}
                   className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-700"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>

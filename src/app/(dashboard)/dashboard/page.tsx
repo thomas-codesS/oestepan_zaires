@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { useAuth } from '@/lib/auth/auth-context'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Package, ShoppingCart, User, BarChart3, Plus, Eye, LogOut } from 'lucide-react'
+import { Package, ShoppingCart, User, BarChart3, Plus, Eye, LogOut, FileText } from 'lucide-react'
 
 export default function DashboardPage() {
   const { user, profile, signOut, isAdmin } = useAuth()
@@ -181,6 +181,55 @@ export default function DashboardPage() {
                 Ver Pedidos
               </Button>
             </Link>
+          </div>
+        </div>
+
+        {/* Lista de Precios PDF */}
+        <div className="bg-white rounded-xl shadow-lg p-6 border border-orange-100 hover:shadow-xl transition-shadow duration-200 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center">
+              <FileText className="w-5 h-5 mr-2 text-orange-500" />
+              Lista de Precios
+            </h2>
+            <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+              <FileText className="w-5 h-5 text-orange-600" />
+            </div>
+          </div>
+          <p className="text-gray-600 mb-4 leading-relaxed text-sm sm:text-base">
+            Consultá nuestra lista de precios actualizada con todos los productos disponibles.
+          </p>
+          <div className="rounded-lg border border-orange-200 overflow-hidden mb-4" style={{ height: '500px' }}>
+            <iframe
+              src="/pdf/Lista%20Oeste%20Pan%20DICIEMBRE.pdf"
+              className="w-full h-full"
+              title="Lista de Precios Oeste Pan"
+            />
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <a
+              href="/pdf/Lista%20Oeste%20Pan%20DICIEMBRE.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1"
+            >
+              <Button className="w-full bg-orange-600 hover:bg-orange-700 text-white transition-colors duration-200">
+                <Eye className="w-4 h-4 mr-2" />
+                Ver PDF Completo
+              </Button>
+            </a>
+            <a
+              href="/pdf/Lista%20Oeste%20Pan%20DICIEMBRE.pdf"
+              download
+              className="flex-1"
+            >
+              <Button
+                className="w-full border-orange-300 text-orange-600 hover:bg-orange-50 transition-colors duration-200"
+                variant="outline"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Descargar PDF
+              </Button>
+            </a>
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -43,28 +43,27 @@ const calculatePriceWithIVA = (price: number, ivaRate: number): number => {
   return price * (1 + ivaRate / 100)
 }
 
-// Función helper para obtener emoji de categoría
-const getCategoryEmoji = (category: string): string => {
-  const categoryEmojis: Record<string, string> = {
-    'panaderia': '🍞',
-    'pasteleria': '🍰',
-    'bolleria': '🥐',
-    'confiteria': '🧁',
-    'bebidas': '☕',
-    'pan': '🥖',
-    'facturas': '🥐',
-    'tortas': '🎂',
-    'galletas': '🍪',
-    'especiales': '⭐'
-  }
-  return categoryEmojis[category.toLowerCase()] || '🥖'
+// Hook de debounce para evitar llamadas excesivas a la API
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(timer)
+  }, [value, delay])
+  return debouncedValue
 }
 
+const ITEMS_PER_PAGE = 30
+
 export default function CatalogPage() {
-  const [products, setProducts] = useState<ProductListResponse | null>(null)
+  const [allProducts, setAllProducts] = useState<Product[]>([])
+  const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+  const [hasMore, setHasMore] = useState(true)
+  const [page, setPage] = useState(1)
+
   // Carrito
   const addItem = useCartStore(state => state.addItem)
 
@@ -75,47 +74,60 @@ export default function CatalogPage() {
   const [sortBy, setSortBy] = useState('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
-  // Paginación
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 12
+  // Debounce para búsqueda y precios (evita una petición por cada tecla)
+  const debouncedSearch = useDebounce(searchTerm, 400)
+  const debouncedMinPrice = useDebounce(priceRange.min, 500)
+  const debouncedMaxPrice = useDebounce(priceRange.max, 500)
 
-  const categories = [
+  // Ref para el sentinel del infinite scroll
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  // Ref para controlar peticiones en curso
+  const isLoadingRef = useRef(false)
+
+  const categories = useMemo(() => [
     'Panaderia',
-    'Pasteleria', 
+    'Pasteleria',
     'Bolleria',
     'Confiteria',
     'Bebidas',
     'Especiales'
-  ]
+  ], [])
 
-  const sortOptions = [
+  const sortOptions = useMemo(() => [
     { value: 'name', label: 'Nombre' },
     { value: 'price', label: 'Precio' },
     { value: 'created_at', label: 'Más recientes' }
-  ]
+  ], [])
 
-  // Función para cargar productos
-  const loadProducts = async () => {
+  // Función para cargar productos (memoizada con useCallback)
+  const loadProducts = useCallback(async (pageNum: number, append: boolean = false) => {
+    if (isLoadingRef.current) return
+    isLoadingRef.current = true
+
     try {
-      setLoading(true)
+      if (append) {
+        setLoadingMore(true)
+      } else {
+        setLoading(true)
+      }
       setError(null)
 
       const filters: ProductFilters = {
-        search: searchTerm || undefined,
+        search: debouncedSearch || undefined,
         category: selectedCategory || undefined,
-        minPrice: priceRange.min ? parseFloat(priceRange.min) : undefined,
-        maxPrice: priceRange.max ? parseFloat(priceRange.max) : undefined,
-        isActive: true, // Solo productos activos en el catálogo público
+        minPrice: debouncedMinPrice ? parseFloat(debouncedMinPrice) : undefined,
+        maxPrice: debouncedMaxPrice ? parseFloat(debouncedMaxPrice) : undefined,
+        isActive: true,
       }
 
       const queryParams = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: itemsPerPage.toString(),
+        page: pageNum.toString(),
+        limit: ITEMS_PER_PAGE.toString(),
         sortBy,
         sortOrder,
         ...Object.fromEntries(
           Object.entries(filters)
-            .filter(([_, v]) => v !== undefined)
+            .filter(([, v]) => v !== undefined)
             .map(([k, v]) => [k, String(v)])
         )
       })
@@ -126,40 +138,67 @@ export default function CatalogPage() {
       }
 
       const data: ProductListResponse = await response.json()
-      setProducts(data)
+
+      if (append) {
+        setAllProducts(prev => [...prev, ...data.products])
+      } else {
+        setAllProducts(data.products)
+      }
+
+      setTotal(data.total)
+      setHasMore(pageNum < data.totalPages)
     } catch (err) {
       console.error('Error loading products:', err)
       setError('Error al cargar el catálogo. Por favor, intenta nuevamente.')
     } finally {
       setLoading(false)
+      setLoadingMore(false)
+      isLoadingRef.current = false
     }
-  }
+  }, [debouncedSearch, selectedCategory, debouncedMinPrice, debouncedMaxPrice, sortBy, sortOrder])
 
-  // Cargar productos al montar el componente y cuando cambien los filtros
+  // Cuando cambian los filtros, resetear y cargar desde página 1
   useEffect(() => {
-    loadProducts()
-  }, [searchTerm, selectedCategory, priceRange, sortBy, sortOrder, currentPage])
+    setPage(1)
+    setAllProducts([])
+    setHasMore(true)
+    loadProducts(1, false)
+  }, [loadProducts])
 
-  // Manejar cambio de página
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  // Infinite scroll con IntersectionObserver
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0]
+        if (entry.isIntersecting && hasMore && !isLoadingRef.current) {
+          const nextPage = page + 1
+          setPage(nextPage)
+          loadProducts(nextPage, true)
+        }
+      },
+      { rootMargin: '200px', threshold: 0.1 }
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [hasMore, page, loadProducts])
 
   // Limpiar filtros
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSearchTerm('')
     setSelectedCategory('')
     setPriceRange({ min: '', max: '' })
     setSortBy('name')
     setSortOrder('asc')
-    setCurrentPage(1)
-  }
+  }, [])
 
   // Agregar producto al carrito
-  const handleAddToCart = (product: Product, quantity: number = 1) => {
+  const handleAddToCart = useCallback((product: Product, quantity: number = 1) => {
     const priceWithIVA = calculatePriceWithIVA(product.price, product.iva_rate)
-    
+
     const cartProduct = {
       id: product.id,
       name: product.name,
@@ -170,11 +209,11 @@ export default function CatalogPage() {
       category: product.category,
       code: product.code
     }
-    
-    addItem(cartProduct, quantity)
-  }
 
-  if (error) {
+    addItem(cartProduct, quantity)
+  }, [addItem])
+
+  if (error && allProducts.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -185,8 +224,8 @@ export default function CatalogPage() {
                 ¡Ups! Algo salió mal
               </h2>
               <p className="text-red-600 mb-6">{error}</p>
-              <Button 
-                onClick={loadProducts}
+              <Button
+                onClick={() => loadProducts(1, false)}
                 className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg font-medium"
               >
                 Intentar Nuevamente
@@ -200,7 +239,7 @@ export default function CatalogPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50">
-      {/* Header Elegante */}
+      {/* Header */}
       <div className="bg-white shadow-lg border-b border-orange-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -214,10 +253,11 @@ export default function CatalogPage() {
               <p className="text-gray-600 text-lg">
                 Productos frescos horneados diariamente con amor y tradición
               </p>
-              {products && (
+              {total > 0 && (
                 <div className="mt-2">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700">
-                    {products.total} productos disponibles
+                    {total} productos disponibles
+                    {allProducts.length < total && ` · Mostrando ${allProducts.length}`}
                   </span>
                 </div>
               )}
@@ -225,8 +265,8 @@ export default function CatalogPage() {
             <div className="flex items-center space-x-4">
               <CartButton />
               <Link href="/dashboard">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="border-orange-300 text-orange-600 hover:bg-orange-50"
                 >
                   ← Volver al Dashboard
@@ -239,17 +279,17 @@ export default function CatalogPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="lg:grid lg:grid-cols-4 lg:gap-8">
-          {/* Sidebar de Filtros Moderno */}
+          {/* Sidebar de Filtros con sticky */}
           <div className="mb-8 lg:mb-0">
-            <div className="bg-white rounded-xl shadow-lg p-6 border border-orange-100">
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-orange-100 lg:sticky lg:top-4">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center">
                   <span className="text-orange-500 mr-2">🔍</span>
                   Filtros
                 </h2>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={clearFilters}
                   className="text-sm border-orange-300 text-orange-600 hover:bg-orange-50"
                 >
@@ -342,32 +382,34 @@ export default function CatalogPage() {
             </div>
           </div>
 
-          {/* Grid de Productos */}
+          {/* Lista de Productos con Scroll Infinito */}
           <div className="lg:col-span-3">
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="space-y-4">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="bg-white rounded-xl shadow-lg p-6 animate-pulse border border-orange-100">
-                    <div className="w-full h-48 bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl mb-4"></div>
-                    <div className="h-4 bg-orange-100 rounded-lg mb-2"></div>
-                    <div className="h-4 bg-orange-100 rounded-lg w-2/3 mb-4"></div>
-                    <div className="h-8 bg-orange-100 rounded-lg"></div>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-1">
+                        <div className="h-4 bg-orange-100 rounded-lg mb-2 w-1/4"></div>
+                        <div className="h-5 bg-orange-100 rounded-lg mb-2 w-1/2"></div>
+                        <div className="h-4 bg-orange-100 rounded-lg w-1/3"></div>
+                      </div>
+                      <div className="h-10 bg-orange-100 rounded-lg w-24"></div>
+                    </div>
                   </div>
                 ))}
               </div>
-            ) : products?.products?.length === 0 ? (
+            ) : allProducts.length === 0 ? (
               <div className="text-center py-16">
                 <div className="bg-white rounded-xl shadow-lg p-12 border border-orange-100">
                   <div className="text-8xl mb-6">🔍</div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-4">
                     No encontramos productos
                   </h3>
-                  <p clas
-                  cls
-                  sName="text-gray-600 mb-8 text-lg">
+                  <p className="text-gray-600 mb-8 text-lg">
                     Intenta ajustar tus filtros o busca algo diferente
                   </p>
-                  <Button 
+                  <Button
                     onClick={clearFilters}
                     className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-lg font-medium"
                   >
@@ -378,130 +420,43 @@ export default function CatalogPage() {
             ) : (
               <div className="bg-white rounded-xl shadow-lg border border-orange-100 overflow-hidden">
                 {/* Header de la lista */}
-                <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-6 py-4 border-b border-orange-100">
+                <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-6 py-4 border-b border-orange-100 sticky top-0 z-10">
                   <h3 className="text-lg font-semibold text-gray-900">Productos Disponibles</h3>
-                  <p className="text-sm text-gray-600">{products?.total || 0} productos encontrados</p>
+                  <p className="text-sm text-gray-600">{total} productos encontrados</p>
                 </div>
 
-                {/* Lista de productos */}
+                {/* Lista de productos con scroll infinito */}
                 <div className="divide-y divide-gray-100">
-                  {products?.products?.map((product) => {
-                    const priceWithIVA = calculatePriceWithIVA(product.price, product.iva_rate)
-                    
-                    return (
-                      <div key={product.id} className="p-4 sm:p-6 hover:bg-gray-50 transition-colors">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
-                          {/* Info del producto */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-orange-100 text-orange-700">
-                                {product.category}
-                              </span>
-                              <span className="text-xs text-gray-500">#{product.code}</span>
-                            </div>
-                            
-                            <h4 className="text-lg font-semibold text-gray-900 mb-1">
-                              {product.name}
-                            </h4>
-                            
-                            {product.description && (
-                              <p className="text-sm text-gray-600 mb-2 line-clamp-1">
-                                {product.description}
-                              </p>
-                            )}
-                            
-                            <div className="flex items-center space-x-4 text-sm">
-                              <span className="font-semibold text-gray-900">
-                                {formatPrice(priceWithIVA)}
-                              </span>
-                              <span className="text-gray-500">
-                                IVA {product.iva_rate}% incl.
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Controles de cantidad y agregar */}
-                          <div className="flex items-center justify-between sm:justify-end space-x-3 w-full sm:w-auto mt-2 sm:mt-0 sm:ml-4">
-                            <div className="flex items-center space-x-2">
-                              <label htmlFor={`qty-${product.id}`} className="text-sm text-gray-600">
-                                Cant:
-                              </label>
-                              <input
-                                id={`qty-${product.id}`}
-                                type="number"
-                                min="1"
-                                defaultValue="1"
-                                className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:border-orange-400 focus:ring-1 focus:ring-orange-400"
-                              />
-                            </div>
-                            
-                            <Button 
-                              size="sm"
-                              onClick={() => {
-                                const input = document.getElementById(`qty-${product.id}`) as HTMLInputElement
-                                const quantity = parseInt(input?.value || '1')
-                                handleAddToCart(product, quantity)
-                              }}
-                              className="bg-orange-600 hover:bg-orange-700 text-white px-6"
-                            >
-                              + Agregar
-                            </Button>
-                            
-                            <Link href={`/catalog/${product.id}`}>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                className="border-orange-300 text-orange-600 hover:bg-orange-50"
-                              >
-                                Ver
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Paginación Elegante */}
-            {products && products.totalPages > 1 && (
-              <div className="flex justify-center mt-12">
-                <div className="flex items-center space-x-2 bg-white rounded-xl shadow-lg p-2 border border-orange-100">
-                  <Button
-                    variant="outline"
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="border-orange-300 text-orange-600 hover:bg-orange-50 disabled:text-gray-400"
-                  >
-                    ← Anterior
-                  </Button>
-                  
-                  {[...Array(products.totalPages)].map((_, i) => (
-                    <Button
-                      key={i + 1}
-                      variant={currentPage === i + 1 ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handlePageChange(i + 1)}
-                      className={currentPage === i + 1 
-                        ? "bg-orange-600 hover:bg-orange-700 text-white"
-                        : "border-orange-300 text-orange-600 hover:bg-orange-50"
-                      }
-                    >
-                      {i + 1}
-                    </Button>
+                  {allProducts.map((product) => (
+                    <ProductRow
+                      key={product.id}
+                      product={product}
+                      onAddToCart={handleAddToCart}
+                    />
                   ))}
-                  
-                  <Button
-                    variant="outline"
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === products.totalPages}
-                    className="border-orange-300 text-orange-600 hover:bg-orange-50 disabled:text-gray-400"
-                  >
-                    Siguiente →
-                  </Button>
                 </div>
+
+                {/* Sentinel para infinite scroll */}
+                <div ref={sentinelRef} className="h-4" />
+
+                {/* Indicador de carga de más productos */}
+                {loadingMore && (
+                  <div className="flex justify-center py-8">
+                    <div className="flex items-center space-x-3">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-600"></div>
+                      <span className="text-gray-600 font-medium">Cargando más productos...</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Indicador de fin de lista */}
+                {!hasMore && allProducts.length > 0 && (
+                  <div className="text-center py-6 border-t border-gray-100">
+                    <p className="text-gray-500 text-sm">
+                      ✅ Has visto todos los {total} productos
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -509,4 +464,89 @@ export default function CatalogPage() {
       </div>
     </div>
   )
-} 
+}
+
+// Componente memoizado para cada fila de producto (evita re-renders innecesarios)
+const ProductRow = React.memo(function ProductRow({
+  product,
+  onAddToCart,
+}: {
+  product: Product
+  onAddToCart: (product: Product, quantity: number) => void
+}) {
+  const priceWithIVA = calculatePriceWithIVA(product.price, product.iva_rate)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  return (
+    <div className="p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0">
+        {/* Info del producto */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center space-x-3 mb-2">
+            <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-orange-100 text-orange-700">
+              {product.category}
+            </span>
+            <span className="text-xs text-gray-500">#{product.code}</span>
+          </div>
+
+          <h4 className="text-lg font-semibold text-gray-900 mb-1">
+            {product.name}
+          </h4>
+
+          {product.description && (
+            <p className="text-sm text-gray-600 mb-2 line-clamp-1">
+              {product.description}
+            </p>
+          )}
+
+          <div className="flex items-center space-x-4 text-sm">
+            <span className="font-semibold text-gray-900">
+              {formatPrice(priceWithIVA)}
+            </span>
+            <span className="text-gray-500">
+              IVA {product.iva_rate}% incl.
+            </span>
+          </div>
+        </div>
+
+        {/* Controles de cantidad y agregar */}
+        <div className="flex items-center justify-between sm:justify-end space-x-3 w-full sm:w-auto mt-2 sm:mt-0 sm:ml-4">
+          <div className="flex items-center space-x-2">
+            <label htmlFor={`qty-${product.id}`} className="text-sm text-gray-600">
+              Cant:
+            </label>
+            <input
+              ref={inputRef}
+              id={`qty-${product.id}`}
+              type="number"
+              min="1"
+              defaultValue="1"
+              className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:border-orange-400 focus:ring-1 focus:ring-orange-400"
+            />
+          </div>
+
+          <Button
+            size="sm"
+            onClick={() => {
+              const quantity = parseInt(inputRef.current?.value || '1')
+              onAddToCart(product, quantity)
+            }}
+            className="bg-orange-600 hover:bg-orange-700 text-white px-6"
+          >
+            + Agregar
+          </Button>
+
+          <Link href={`/catalog/${product.id}`}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-orange-300 text-orange-600 hover:bg-orange-50"
+            >
+              Ver
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}) 
