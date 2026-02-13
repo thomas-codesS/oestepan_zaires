@@ -93,7 +93,7 @@ export function CartSidebar() {
                         {item.product.name}
                       </h4>
                       <p className="text-xs text-gray-500">
-                        ${formatPrice(item.product.price)} c/u
+                        {formatPrice(item.product.price)} c/u
                       </p>
                     </div>
 

@@ -124,6 +124,7 @@ export function formatCartPriceBreakdown(items: Array<{
   quantity: number
   product: {
     price: number
+    price_with_iva?: number
     iva_rate: number
   }
 }>): {
@@ -139,9 +140,10 @@ export function formatCartPriceBreakdown(items: Array<{
   const ivaByRate: { [key: number]: number } = {}
 
   items.forEach(item => {
-    const itemSubtotalWithIVA = item.product.price * item.quantity
-    const itemIVA = calculateIVAFromTotal(itemSubtotalWithIVA, item.product.iva_rate)
-    const itemSubtotal = itemSubtotalWithIVA - itemIVA
+    const itemSubtotal = item.product.price * item.quantity
+    const itemIVA = typeof item.product.price_with_iva === 'number'
+      ? (item.product.price_with_iva - item.product.price) * item.quantity
+      : (item.product.price * (item.product.iva_rate / 100)) * item.quantity
 
     totalSubtotal += itemSubtotal
     totalIVA += itemIVA
@@ -160,9 +162,11 @@ export function formatCartPriceBreakdown(items: Array<{
     iva: formatPrice(totalIVA),
     subtotalAmount: totalSubtotal,
     ivaAmount: totalIVA,
-    ivaBreakdown: Object.entries(ivaByRate).map(([rate, amount]) => ({
-      rate: parseFloat(rate),
-      amount
-    }))
+    ivaBreakdown: Object.entries(ivaByRate)
+      .map(([rate, amount]) => ({
+        rate: parseFloat(rate),
+        amount
+      }))
+      .sort((a, b) => a.rate - b.rate)
   }
 } 

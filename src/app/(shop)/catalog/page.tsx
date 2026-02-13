@@ -474,7 +474,6 @@ const ProductRow = React.memo(function ProductRow({
   product: Product
   onAddToCart: (product: Product, quantity: number) => void
 }) {
-  const priceWithIVA = calculatePriceWithIVA(product.price, product.iva_rate)
   const inputRef = useRef<HTMLInputElement>(null)
 
   return (
@@ -499,12 +498,12 @@ const ProductRow = React.memo(function ProductRow({
             </p>
           )}
 
-          <div className="flex items-center space-x-4 text-sm">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
             <span className="font-semibold text-gray-900">
-              {formatPrice(priceWithIVA)}
+              Precio: {formatPrice(product.price)}
             </span>
             <span className="text-gray-500">
-              IVA {product.iva_rate}% incl.
+              IVA {product.iva_rate}%
             </span>
           </div>
         </div>

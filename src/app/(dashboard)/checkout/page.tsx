@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/auth/auth-context'
 import { useCartStore } from '@/lib/store/cart-store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { formatPrice, formatPriceBreakdown } from '@/lib/utils/format'
+import { formatPrice, formatCartPriceBreakdown } from '@/lib/utils/format'
 import { CreateOrderRequest, OrderError } from '@/lib/types/order'
 
 export default function CheckoutPage() {
@@ -254,7 +254,7 @@ export default function CheckoutPage() {
                       Procesando...
                     </div>
                   ) : (
-                    `Confirmar Pedido - ${formatPriceBreakdown(total, 21).total}`
+                    `Confirmar Pedido - ${formatCartPriceBreakdown(items).total}`
                   )}
                 </Button>
               </div>
@@ -274,14 +274,19 @@ export default function CheckoutPage() {
                     <div>
                       <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{item.product.name}</h3>
                       <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mt-1">{item.product.description}</p>
-                      <p className="text-sm font-medium text-orange-600 mt-1">
-                        {formatPrice(item.product.price_with_iva)} c/u
-                      </p>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                        <p className="text-sm font-medium text-orange-600">
+                          {formatPrice(item.product.price)} c/u
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          IVA {item.product.iva_rate}%
+                        </p>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <span className="text-xs sm:text-sm text-gray-500 font-medium">
-                        Subtotal: {formatPrice(item.product.price_with_iva * item.quantity)}
+                        Subtotal: {formatPrice(item.product.price * item.quantity)}
                       </span>
 
                       <div className="flex items-center space-x-2">
@@ -317,17 +322,19 @@ export default function CheckoutPage() {
 
             <div className="border-t border-gray-200 pt-4 mt-6">
               {(() => {
-                const breakdown = formatPriceBreakdown(total, 21)
+                const breakdown = formatCartPriceBreakdown(items)
                 return (
                   <div className="space-y-2">
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600">Subtotal:</span>
+                      <span className="text-gray-600">Total productos:</span>
                       <span className="text-gray-900">{breakdown.subtotal}</span>
                     </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600">IVA (21%):</span>
-                      <span className="text-gray-900">{breakdown.iva}</span>
-                    </div>
+                    {breakdown.ivaBreakdown.map((ivaItem) => (
+                      <div key={ivaItem.rate} className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600">IVA ({ivaItem.rate}%):</span>
+                        <span className="text-gray-900">{formatPrice(ivaItem.amount)}</span>
+                      </div>
+                    ))}
                     <hr className="border-gray-200" />
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-bold text-gray-900">Total:</span>
@@ -337,7 +344,7 @@ export default function CheckoutPage() {
                 )
               })()}
               <p className="text-xs text-gray-500 mt-1 text-right">
-                Precios finales con IVA incluido
+                Total final con IVA incluido
               </p>
             </div>
 
