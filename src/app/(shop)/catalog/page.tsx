@@ -53,18 +53,14 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue
 }
 
-const ITEMS_PER_PAGE = 30
+// Cargar todos los productos de una vez (131 productos es trivial)
+const ITEMS_PER_PAGE = 500
 
 export default function CatalogPage() {
   const [allProducts, setAllProducts] = useState<Product[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [hasMore, setHasMore] = useState(true)
-  // Usar refs para page y hasMore para evitar recreación del observer en cada cambio de página
-  const pageRef = useRef(1)
-  const hasMoreRef = useRef(true)
 
   // Carrito
   const addItem = useCartStore(state => state.addItem)
@@ -81,8 +77,6 @@ export default function CatalogPage() {
   const debouncedMinPrice = useDebounce(priceRange.min, 500)
   const debouncedMaxPrice = useDebounce(priceRange.max, 500)
 
-  // Ref para el sentinel del infinite scroll
-  const sentinelRef = useRef<HTMLDivElement>(null)
   // Ref para controlar peticiones en curso
   const isLoadingRef = useRef(false)
 
@@ -101,17 +95,13 @@ export default function CatalogPage() {
     { value: 'created_at', label: 'Más recientes' }
   ], [])
 
-  // Función para cargar productos (memoizada con useCallback)
-  const loadProducts = useCallback(async (pageNum: number, append: boolean = false) => {
+  // Función para cargar todos los productos
+  const loadProducts = useCallback(async () => {
     if (isLoadingRef.current) return
     isLoadingRef.current = true
 
     try {
-      if (append) {
-        setLoadingMore(true)
-      } else {
-        setLoading(true)
-      }
+      setLoading(true)
       setError(null)
 
       const filters: ProductFilters = {
@@ -122,7 +112,7 @@ export default function CatalogPage() {
       }
 
       const queryParams = new URLSearchParams({
-        page: pageNum.toString(),
+        page: '1',
         limit: ITEMS_PER_PAGE.toString(),
         sortBy,
         sortOrder,
@@ -140,75 +130,21 @@ export default function CatalogPage() {
       }
 
       const data: ProductListResponse = await response.json()
-
-      if (append) {
-        setAllProducts(prev => [...prev, ...data.products])
-      } else {
-        setAllProducts(data.products)
-      }
-
+      setAllProducts(data.products)
       setTotal(data.total)
-      const newHasMore = pageNum < data.totalPages
-      hasMoreRef.current = newHasMore
-      setHasMore(newHasMore)
     } catch (err) {
       console.error('Error loading products:', err)
       setError('Error al cargar el catálogo. Por favor, intenta nuevamente.')
     } finally {
       setLoading(false)
-      setLoadingMore(false)
       isLoadingRef.current = false
     }
   }, [debouncedSearch, selectedCategory, debouncedMinPrice, debouncedMaxPrice, sortBy, sortOrder])
 
-  // Cuando cambian los filtros, resetear y cargar desde página 1
+  // Cuando cambian los filtros, cargar productos
   useEffect(() => {
-    pageRef.current = 1
-    hasMoreRef.current = true
-    setAllProducts([])
-    setHasMore(true)
-    loadProducts(1, false)
+    loadProducts()
   }, [loadProducts])
-
-  // Infinite scroll con IntersectionObserver
-  useEffect(() => {
-    if (!hasMore) return
-    const sentinel = sentinelRef.current
-    if (!sentinel) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0]
-        if (entry.isIntersecting && hasMoreRef.current && !isLoadingRef.current) {
-          pageRef.current += 1
-          loadProducts(pageRef.current, true)
-        }
-      },
-      { rootMargin: '200px', threshold: 0.1 }
-    )
-
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [hasMore, loadProducts])
-
-  // Después de cada carga, re-verificar si el sentinel sigue visible para cargar más
-  useEffect(() => {
-    if (loading || loadingMore) return
-    if (!hasMore) return
-
-    const sentinel = sentinelRef.current
-    if (!sentinel) return
-
-    const timeoutId = setTimeout(() => {
-      const rect = sentinel.getBoundingClientRect()
-      if (rect.top < window.innerHeight + 200 && hasMoreRef.current && !isLoadingRef.current) {
-        pageRef.current += 1
-        loadProducts(pageRef.current, true)
-      }
-    }, 100)
-
-    return () => clearTimeout(timeoutId)
-  }, [loading, loadingMore, hasMore, loadProducts])
 
   // Limpiar filtros
   const clearFilters = useCallback(() => {
@@ -249,7 +185,7 @@ export default function CatalogPage() {
               </h2>
               <p className="text-red-600 mb-6">{error}</p>
               <Button
-                onClick={() => loadProducts(1, false)}
+                onClick={() => loadProducts()}
                 className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg font-medium"
               >
                 Intentar Nuevamente
@@ -281,7 +217,6 @@ export default function CatalogPage() {
                 <div className="mt-2">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-700">
                     {total} productos disponibles
-                    {allProducts.length < total && ` · Mostrando ${allProducts.length}`}
                   </span>
                 </div>
               )}
@@ -449,7 +384,7 @@ export default function CatalogPage() {
                   <p className="text-sm text-gray-600">{total} productos encontrados</p>
                 </div>
 
-                {/* Lista de productos con scroll infinito */}
+                {/* Lista de productos */}
                 <div className="divide-y divide-gray-100">
                   {allProducts.map((product) => (
                     <ProductRow
@@ -459,28 +394,6 @@ export default function CatalogPage() {
                     />
                   ))}
                 </div>
-
-                {/* Sentinel para infinite scroll */}
-                <div ref={sentinelRef} className="h-4" />
-
-                {/* Indicador de carga de más productos */}
-                {loadingMore && (
-                  <div className="flex justify-center py-8">
-                    <div className="flex items-center space-x-3">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-600"></div>
-                      <span className="text-gray-600 font-medium">Cargando más productos...</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Indicador de fin de lista */}
-                {!hasMore && allProducts.length > 0 && (
-                  <div className="text-center py-6 border-t border-gray-100">
-                    <p className="text-gray-500 text-sm">
-                      ✅ Has visto todos los {total} productos
-                    </p>
-                  </div>
-                )}
               </div>
             )}
           </div>
