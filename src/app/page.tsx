@@ -303,53 +303,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Sección Lista de Precios PDF */}
-      <section className="py-20 lg:py-24 bg-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 space-y-6">
-            <h2 className="text-4xl lg:text-5xl font-bold text-black text-balance">📋 Lista de Precios</h2>
-            <p className="text-xl lg:text-2xl text-gray-600 text-pretty">
-              Consultá nuestra lista actualizada con todos los productos y precios
-            </p>
-          </div>
-          <div className="bg-gray-50 rounded-3xl shadow-xl p-6 lg:p-10 border border-gray-200">
-            <div className="rounded-2xl overflow-hidden border border-gray-300 mb-8" style={{ height: '600px' }}>
-              <iframe
-                src="/pdf/Lista%20Oeste%20Pan%20DICIEMBRE.pdf"
-                className="w-full h-full"
-                title="Lista de Precios Oeste Pan Diciembre"
-              />
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="/pdf/Lista%20Oeste%20Pan%20DICIEMBRE.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto bg-black hover:bg-gray-800 text-white px-10 py-5 text-xl font-bold shadow-2xl transition-all duration-300"
-                >
-                  Ver PDF Completo
-                </Button>
-              </a>
-              <a
-                href="/pdf/Lista%20Oeste%20Pan%20DICIEMBRE.pdf"
-                download
-              >
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full sm:w-auto border-3 border-black text-black hover:bg-black hover:text-white px-10 py-5 text-xl font-bold bg-transparent transition-all duration-300"
-                >
-                  Descargar PDF
-                </Button>
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="py-20 lg:py-32 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20 space-y-6">
