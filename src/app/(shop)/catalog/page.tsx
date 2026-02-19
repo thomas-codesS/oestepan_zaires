@@ -62,7 +62,9 @@ export default function CatalogPage() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
-  const [page, setPage] = useState(1)
+  // Usar refs para page y hasMore para evitar recreación del observer en cada cambio de página
+  const pageRef = useRef(1)
+  const hasMoreRef = useRef(true)
 
   // Carrito
   const addItem = useCartStore(state => state.addItem)
@@ -117,7 +119,6 @@ export default function CatalogPage() {
         category: selectedCategory || undefined,
         minPrice: debouncedMinPrice ? parseFloat(debouncedMinPrice) : undefined,
         maxPrice: debouncedMaxPrice ? parseFloat(debouncedMaxPrice) : undefined,
-        isActive: true,
       }
 
       const queryParams = new URLSearchParams({
@@ -125,6 +126,7 @@ export default function CatalogPage() {
         limit: ITEMS_PER_PAGE.toString(),
         sortBy,
         sortOrder,
+        is_active: 'true',
         ...Object.fromEntries(
           Object.entries(filters)
             .filter(([, v]) => v !== undefined)
@@ -146,7 +148,9 @@ export default function CatalogPage() {
       }
 
       setTotal(data.total)
-      setHasMore(pageNum < data.totalPages)
+      const newHasMore = pageNum < data.totalPages
+      hasMoreRef.current = newHasMore
+      setHasMore(newHasMore)
     } catch (err) {
       console.error('Error loading products:', err)
       setError('Error al cargar el catálogo. Por favor, intenta nuevamente.')
@@ -159,7 +163,8 @@ export default function CatalogPage() {
 
   // Cuando cambian los filtros, resetear y cargar desde página 1
   useEffect(() => {
-    setPage(1)
+    pageRef.current = 1
+    hasMoreRef.current = true
     setAllProducts([])
     setHasMore(true)
     loadProducts(1, false)
@@ -167,16 +172,16 @@ export default function CatalogPage() {
 
   // Infinite scroll con IntersectionObserver
   useEffect(() => {
+    if (!hasMore) return
     const sentinel = sentinelRef.current
     if (!sentinel) return
 
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0]
-        if (entry.isIntersecting && hasMore && !isLoadingRef.current) {
-          const nextPage = page + 1
-          setPage(nextPage)
-          loadProducts(nextPage, true)
+        if (entry.isIntersecting && hasMoreRef.current && !isLoadingRef.current) {
+          pageRef.current += 1
+          loadProducts(pageRef.current, true)
         }
       },
       { rootMargin: '200px', threshold: 0.1 }
@@ -184,7 +189,26 @@ export default function CatalogPage() {
 
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [hasMore, page, loadProducts])
+  }, [hasMore, loadProducts])
+
+  // Después de cada carga, re-verificar si el sentinel sigue visible para cargar más
+  useEffect(() => {
+    if (loading || loadingMore) return
+    if (!hasMore) return
+
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    const timeoutId = setTimeout(() => {
+      const rect = sentinel.getBoundingClientRect()
+      if (rect.top < window.innerHeight + 200 && hasMoreRef.current && !isLoadingRef.current) {
+        pageRef.current += 1
+        loadProducts(pageRef.current, true)
+      }
+    }, 100)
+
+    return () => clearTimeout(timeoutId)
+  }, [loading, loadingMore, hasMore, loadProducts])
 
   // Limpiar filtros
   const clearFilters = useCallback(() => {
