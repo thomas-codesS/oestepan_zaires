@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { 
-  CreateOrderRequest, 
-  OrderFilters, 
-  OrderListResponse, 
+import {
+  CreateOrderRequest,
+  OrderFilters,
+  OrderListResponse,
   OrderWithItems,
-  OrderError 
+  OrderError
 } from '@/lib/types/order'
+import { getDeliveryWindow, formatDeliveryDateForApi } from '@/lib/utils/delivery-schedule'
 
 // Método GET para obtener lista de pedidos
 export async function GET(request: NextRequest) {
@@ -313,6 +314,64 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const orderData: CreateOrderRequest = body;
+
+    // Obtener perfil del usuario para validar días de entrega y rol
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, delivery_days')
+      .eq('id', user.id)
+      .single();
+
+    const isAdmin = profile?.role === 'admin';
+
+    // Validar ventana de pedido (solo para clientes, no para admins)
+    if (!isAdmin) {
+      const deliveryDays: number[] = profile?.delivery_days ?? [];
+
+      if (deliveryDays.length === 0) {
+        return NextResponse.json(
+          { error: 'Tu cuenta no tiene días de entrega configurados. Contactá al administrador.' },
+          { status: 400 }
+        );
+      }
+
+      const deliveryWindow = getDeliveryWindow(deliveryDays);
+
+      if (!deliveryWindow.isOpen) {
+        return NextResponse.json(
+          { error: 'El horario de pedidos está cerrado. Los pedidos se reciben hasta las 12:00 hs del día habilitado.' },
+          { status: 400 }
+        );
+      }
+
+      // Calcular la fecha de entrega esperada y sobreescribir la del cliente (no confiamos en el cliente)
+      const expectedDeliveryDate = deliveryWindow.deliveryDate
+        ? formatDeliveryDateForApi(deliveryWindow.deliveryDate)
+        : null;
+
+      if (expectedDeliveryDate) {
+        // Forzar la fecha de entrega correcta (no depender del valor enviado por el cliente)
+        orderData.delivery_date = expectedDeliveryDate;
+
+        // Verificar que no existe ya un pedido activo para esta fecha de entrega (no agregados)
+        const { data: existingOrders } = await supabase
+          .from('orders')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('delivery_date', expectedDeliveryDate)
+          .in('status', ['pending', 'confirmed', 'preparing', 'ready']);
+
+        if (existingOrders && existingOrders.length > 0) {
+          return NextResponse.json(
+            {
+              error:
+                'Ya tenés un pedido para esta fecha de entrega. Para agregar productos, comunicáte directamente con nosotros.'
+            },
+            { status: 400 }
+          );
+        }
+      }
+    }
 
     // Validar que hay items en el pedido
     if (!orderData.items || orderData.items.length === 0) {

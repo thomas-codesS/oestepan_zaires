@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/lib/auth/auth-context'
@@ -9,20 +9,26 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { formatPrice, formatCartPriceBreakdown } from '@/lib/utils/format'
 import { CreateOrderRequest, OrderError } from '@/lib/types/order'
+import {
+  getDeliveryWindow,
+  formatDeliveryDateForApi,
+  formatDateDisplay,
+  formatDateTimeDisplay,
+} from '@/lib/utils/delivery-schedule'
+import { ORDER_RULES } from '@/lib/constants/business'
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
+  const { user, profile, loading: authLoading } = useAuth()
   const { items, total, clearCart, updateQuantity, removeItem } = useCartStore()
-  
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   const [formData, setFormData] = useState({
-    delivery_date: '',
     delivery_address: '',
     phone: '',
-    notes: ''
+    notes: '',
   })
 
   useEffect(() => {
@@ -37,12 +43,21 @@ export default function CheckoutPage() {
     }
   }, [items, router])
 
+  // Calcular la ventana de pedido activa para este usuario
+  const deliveryWindow = useMemo(() => {
+    const deliveryDays = profile?.delivery_days ?? []
+    return getDeliveryWindow(deliveryDays)
+  }, [profile?.delivery_days])
+
+  // String YYYY-MM-DD para enviar a la API
+  const deliveryDateForApi = useMemo(() => {
+    if (!deliveryWindow.isOpen || !deliveryWindow.deliveryDate) return ''
+    return formatDeliveryDateForApi(deliveryWindow.deliveryDate)
+  }, [deliveryWindow])
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    setFormData(prev => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,10 +70,12 @@ export default function CheckoutPage() {
         throw new Error('No se pudo obtener el token de autenticación. Por favor, inicia sesión nuevamente.')
       }
 
-      console.log('Frontend JWT:', user.access_token)
+      if (!deliveryWindow.isOpen || !deliveryDateForApi) {
+        throw new Error('El horario de pedidos está cerrado. No se pueden enviar pedidos en este momento.')
+      }
 
       const orderData: CreateOrderRequest = {
-        delivery_date: formData.delivery_date || undefined,
+        delivery_date: deliveryDateForApi,
         delivery_address: formData.delivery_address || undefined,
         phone: formData.phone || undefined,
         notes: formData.notes || undefined,
@@ -69,19 +86,19 @@ export default function CheckoutPage() {
           quantity: item.quantity,
           unit_price: item.product.price,
           unit_price_with_iva: item.product.price_with_iva,
-          iva_rate: item.product.iva_rate
-        }))
+          iva_rate: item.product.iva_rate,
+        })),
       }
 
       const response = await fetch('/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.access_token}`,
-          'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+          Authorization: `Bearer ${user.access_token}`,
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         },
         credentials: 'include',
-        body: JSON.stringify(orderData)
+        body: JSON.stringify(orderData),
       })
 
       if (!response.ok) {
@@ -90,7 +107,6 @@ export default function CheckoutPage() {
       }
 
       const order = await response.json()
-
       clearCart()
       router.push(`/orders/confirmation/${order.id}`)
     } catch (err) {
@@ -117,15 +133,59 @@ export default function CheckoutPage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50">
         <div className="text-center">
           <div className="text-6xl mb-4">🛒</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Tu carrito está vacío
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Tu carrito está vacío</h2>
+          <p className="text-gray-600 mb-6">Agrega algunos productos antes de hacer un pedido</p>
+          <Link href="/catalog">
+            <Button className="bg-orange-600 hover:bg-orange-700 text-white">Ver Catálogo</Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // Sin días de entrega configurados
+  if (!profile?.delivery_days || profile.delivery_days.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50">
+        <div className="max-w-md mx-auto text-center p-8 bg-white rounded-xl shadow-lg border border-orange-100">
+          <div className="text-5xl mb-4">📋</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Sin días de entrega</h2>
           <p className="text-gray-600 mb-6">
-            Agrega algunos productos antes de hacer un pedido
+            Tu cuenta no tiene días de entrega configurados. Contactá al administrador para habilitarlos.
           </p>
           <Link href="/catalog">
-            <Button className="bg-orange-600 hover:bg-orange-700 text-white">
-              Ver Catálogo
+            <Button variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50">
+              Volver al Catálogo
+            </Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // Ventana de pedido cerrada
+  if (!deliveryWindow.isOpen) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50">
+        <div className="max-w-md mx-auto text-center p-8 bg-white rounded-xl shadow-lg border border-red-100">
+          <div className="text-5xl mb-4">🔒</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Pedidos cerrados</h2>
+          <p className="text-gray-600 mb-4">
+            El horario de pedidos ya cerró. Los pedidos se reciben hasta las{' '}
+            <strong>{ORDER_RULES.CUTOFF_HOUR}:00 hs</strong> del día habilitado.
+          </p>
+          {deliveryWindow.nextWindowOpens && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6 text-sm text-orange-800">
+              <p className="font-semibold mb-1">Próxima apertura:</p>
+              <p className="capitalize">{formatDateTimeDisplay(deliveryWindow.nextWindowOpens)} hs</p>
+            </div>
+          )}
+          <p className="text-xs text-gray-500 mb-6">
+            Para agregar productos a un pedido existente, comunicáte directamente con nosotros.
+          </p>
+          <Link href="/catalog">
+            <Button variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50">
+              Volver al Catálogo
             </Button>
           </Link>
         </div>
@@ -158,6 +218,7 @@ export default function CheckoutPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Formulario */}
           <div className="bg-white rounded-xl shadow-lg p-6 border border-orange-100">
             <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
               <span className="text-orange-500 mr-2">📝</span>
@@ -167,28 +228,28 @@ export default function CheckoutPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <div className="text-sm text-red-700">
-                    {error}
-                  </div>
+                  <div className="text-sm text-red-700">{error}</div>
                 </div>
               )}
 
+              {/* Fecha de entrega: solo lectura, calculada automáticamente */}
               <div>
-                <label htmlFor="delivery_date" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Fecha de Entrega
                 </label>
-                <Input
-                  type="date"
-                  id="delivery_date"
-                  name="delivery_date"
-                  value={formData.delivery_date}
-                  onChange={handleInputChange}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="border-orange-200 focus:border-orange-400 focus:ring-orange-200"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Especificar día de entrega
-                </p>
+                <div className="w-full px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg text-gray-800 font-medium capitalize">
+                  {deliveryWindow.deliveryDate
+                    ? formatDateDisplay(deliveryWindow.deliveryDate)
+                    : '—'}
+                </div>
+                {deliveryWindow.orderDate && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Pedidos hasta el{' '}
+                    <strong className="text-orange-700">
+                      {formatDateDisplay(deliveryWindow.orderDate)} a las {ORDER_RULES.CUTOFF_HOUR}:00 hs
+                    </strong>
+                  </p>
+                )}
               </div>
 
               <div>
@@ -204,9 +265,7 @@ export default function CheckoutPage() {
                   placeholder="Calle, número, piso, departamento"
                   className="border-orange-200 focus:border-orange-400 focus:ring-orange-200"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Dirección de entrega - Especificar bien
-                </p>
+                <p className="text-xs text-gray-500 mt-1">Especificar bien la dirección de entrega</p>
               </div>
 
               <div>
@@ -222,9 +281,7 @@ export default function CheckoutPage() {
                   placeholder="+54 11 1234-5678"
                   className="border-orange-200 focus:border-orange-400 focus:ring-orange-200"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Para coordinar la entrega
-                </p>
+                <p className="text-xs text-gray-500 mt-1">Para coordinar la entrega</p>
               </div>
 
               <div>
@@ -236,13 +293,22 @@ export default function CheckoutPage() {
                   name="notes"
                   value={formData.notes}
                   onChange={handleInputChange}
-                  rows={4}
+                  rows={3}
                   placeholder="Instrucciones especiales, alergias, preferencias..."
                   className="w-full p-3 border border-orange-200 rounded-lg focus:ring-orange-200 focus:border-orange-400 resize-none"
                 />
               </div>
 
-              <div className="pt-4">
+              {/* Aviso de no agregados */}
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
+                <p className="font-semibold mb-1">Importante</p>
+                <p>
+                  Una vez enviado el pedido, <strong>no se pueden hacer agregados por la página</strong>.
+                  Para sumar productos a un pedido ya enviado, comunicáte directamente con nosotros.
+                </p>
+              </div>
+
+              <div className="pt-2">
                 <Button
                   type="submit"
                   disabled={loading}
@@ -254,13 +320,14 @@ export default function CheckoutPage() {
                       Procesando...
                     </div>
                   ) : (
-                    `Confirmar Pedido - ${formatCartPriceBreakdown(items).total}`
+                    `Confirmar Pedido — ${formatCartPriceBreakdown(items).total}`
                   )}
                 </Button>
               </div>
             </form>
           </div>
 
+          {/* Resumen del pedido */}
           <div className="bg-white rounded-xl shadow-lg p-6 border border-orange-100">
             <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
               <span className="text-orange-500 mr-2">🛒</span>
@@ -268,19 +335,15 @@ export default function CheckoutPage() {
             </h2>
 
             <div className="space-y-4">
-              {items.map((item) => (
+              {items.map(item => (
                 <div key={item.product.id} className="pb-4 border-b border-gray-100">
                   <div className="flex flex-col space-y-3">
                     <div>
                       <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{item.product.name}</h3>
                       <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mt-1">{item.product.description}</p>
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-                        <p className="text-sm font-medium text-orange-600">
-                          {formatPrice(item.product.price)} c/u
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          IVA {item.product.iva_rate}%
-                        </p>
+                        <p className="text-sm font-medium text-orange-600">{formatPrice(item.product.price)} c/u</p>
+                        <p className="text-xs text-gray-500">IVA {item.product.iva_rate}%</p>
                       </div>
                     </div>
 
@@ -329,7 +392,7 @@ export default function CheckoutPage() {
                       <span className="text-gray-600">Total productos:</span>
                       <span className="text-gray-900">{breakdown.subtotal}</span>
                     </div>
-                    {breakdown.ivaBreakdown.map((ivaItem) => (
+                    {breakdown.ivaBreakdown.map(ivaItem => (
                       <div key={ivaItem.rate} className="flex justify-between items-center text-sm">
                         <span className="text-gray-600">IVA ({ivaItem.rate}%):</span>
                         <span className="text-gray-900">{formatPrice(ivaItem.amount)}</span>
@@ -343,17 +406,17 @@ export default function CheckoutPage() {
                   </div>
                 )
               })()}
-              <p className="text-xs text-gray-500 mt-1 text-right">
-                Total final con IVA incluido
-              </p>
+              <p className="text-xs text-gray-500 mt-1 text-right">Total final con IVA incluido</p>
             </div>
 
             <div className="mt-6 p-3 sm:p-4 bg-orange-50 rounded-lg border border-orange-200">
-              <h3 className="font-semibold text-orange-800 mb-2 text-sm sm:text-base">ℹ️ Información Importante</h3>
+              <h3 className="font-semibold text-orange-800 mb-2 text-sm sm:text-base">Información Importante</h3>
               <ul className="text-xs sm:text-sm text-orange-700 space-y-1">
                 <li>• Los pedidos se preparan frescos diariamente</li>
                 <li>• Horarios de entrega: 8:00 - 18:00</li>
-                <li>• Para pedidos grandes, coordinaremos horario</li>
+                <li>
+                  • Pedidos hasta las <strong>{ORDER_RULES.CUTOFF_HOUR}:00 hs</strong> del día habilitado
+                </li>
               </ul>
             </div>
           </div>

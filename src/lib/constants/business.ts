@@ -6,7 +6,7 @@
 // Reglas de pedidos
 export const ORDER_RULES = {
   MINIMUM_AMOUNT: Number(process.env.NEXT_PUBLIC_MINIMUM_ORDER_AMOUNT) || 50000,
-  CUTOFF_HOUR: Number(process.env.NEXT_PUBLIC_ORDER_CUTOFF_HOUR) || 13, // 1:00 PM
+  CUTOFF_HOUR: Number(process.env.NEXT_PUBLIC_ORDER_CUTOFF_HOUR) || 12, // 12:00 PM (mediodía)
   CUTOFF_MINUTE: 0,
 } as const
 
@@ -71,7 +71,7 @@ export const FILE_LIMITS = {
 // Mensajes de error comunes
 export const ERROR_MESSAGES = {
   MINIMUM_ORDER_NOT_MET: `El monto mínimo del pedido es $${ORDER_RULES.MINIMUM_AMOUNT.toLocaleString()}`,
-  ORDER_CUTOFF_PASSED: `No se pueden confirmar pedidos después de las ${ORDER_RULES.CUTOFF_HOUR}:00 PM del día anterior`,
+  ORDER_CUTOFF_PASSED: `El horario de pedidos ya cerró. Los pedidos se reciben hasta las ${ORDER_RULES.CUTOFF_HOUR}:00 hs del día habilitado`,
   INVALID_DELIVERY_DATE: 'La fecha de entrega no está disponible para este cliente',
   UNAUTHORIZED: 'No tienes permisos para realizar esta acción',
   INVALID_FILE_TYPE: 'Tipo de archivo no válido. Solo se permiten archivos Excel (.xlsx, .xls) o CSV (.csv)',
