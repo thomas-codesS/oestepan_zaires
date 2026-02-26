@@ -24,7 +24,9 @@ export async function GET(request: NextRequest) {
 
     // Obtener parámetros de búsqueda
     const { searchParams } = new URL(request.url)
-    const search = searchParams.get('search') || ''
+    const rawSearch = searchParams.get('search') || ''
+    // Sanitizar: eliminar caracteres especiales de PostgREST filter syntax
+    const search = rawSearch.replace(/[%_\\().,]/g, '').trim()
 
     // Obtener todos los clientes
     let query = supabase
