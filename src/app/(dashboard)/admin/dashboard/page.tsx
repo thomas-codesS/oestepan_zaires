@@ -358,6 +358,16 @@ export default function AdminDashboardPage() {
                 </Button>
               </Link>
 
+              <Link href="/admin/clients">
+                <Button
+                  variant="outline"
+                  className="w-full h-14 sm:h-16 flex flex-col items-center justify-center border-purple-200 hover:bg-purple-50"
+                >
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600 mb-1" />
+                  <span className="text-xs sm:text-sm">Clientes</span>
+                </Button>
+              </Link>
+
               <Link href="/admin/products/new" className="col-span-2 sm:col-span-1">
                 <Button
                   className="w-full h-14 sm:h-16 flex flex-col items-center justify-center bg-orange-600 hover:bg-orange-700"
