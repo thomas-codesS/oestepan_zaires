@@ -62,14 +62,20 @@ export default function DashboardLayout({
                   >
                     Carga Masiva
                   </Link>
-                  <Link 
-                    href="/admin/orders" 
+                  <Link
+                    href="/admin/clients"
+                    className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Clientes
+                  </Link>
+                  <Link
+                    href="/admin/orders"
                     className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                   >
                     Pedidos
                   </Link>
-                  <Link 
-                    href="/admin/orders-by-day" 
+                  <Link
+                    href="/admin/orders-by-day"
                     className="text-gray-600 hover:text-orange-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                   >
                     Por Día

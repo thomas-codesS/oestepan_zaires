@@ -15,7 +15,6 @@ export default function ProfilePage() {
     full_name: '',
     company_name: '',
     razon_social: '',
-    delivery_days: [] as number[]
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -35,7 +34,6 @@ export default function ProfilePage() {
         full_name: profile.full_name || '',
         company_name: profile.company_name || '',
         razon_social: profile.razon_social || '',
-        delivery_days: profile.delivery_days || []
       })
     }
   }, [profile])
@@ -43,15 +41,6 @@ export default function ProfilePage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
-  }
-
-  const handleDeliveryDayChange = (day: number) => {
-    setFormData(prev => ({
-      ...prev,
-      delivery_days: prev.delivery_days.includes(day)
-        ? prev.delivery_days.filter(d => d !== day)
-        : [...prev.delivery_days, day].sort()
-    }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,7 +54,6 @@ export default function ProfilePage() {
         full_name: formData.full_name || undefined,
         company_name: formData.company_name || undefined,
         razon_social: formData.razon_social || undefined,
-        delivery_days: formData.delivery_days.length > 0 ? formData.delivery_days : undefined
       })
       
       setSuccess('Perfil actualizado correctamente')
@@ -83,7 +71,7 @@ export default function ProfilePage() {
     { value: 4, label: 'Jueves' },
     { value: 5, label: 'Viernes' },
     { value: 6, label: 'Sábado' },
-    { value: 7, label: 'Domingo' }
+    { value: 0, label: 'Domingo' }
   ]
 
   // Mostrar loading mientras se autentica
@@ -247,29 +235,27 @@ export default function ProfilePage() {
               />
             </div>
 
-            {/* Días de entrega */}
+            {/* Días de entrega - solo lectura, administrado por el admin */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Días de entrega preferidos (opcional)
+                Días de entrega asignados
               </label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {deliveryDayOptions.map((day) => (
-                  <label
-                    key={day.value}
-                    className="flex items-center p-3 border border-orange-200 rounded-lg cursor-pointer hover:bg-orange-50"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.delivery_days.includes(day.value)}
-                      onChange={() => handleDeliveryDayChange(day.value)}
-                      className="mr-2 text-orange-600"
-                    />
-                    <span className="text-sm font-medium text-gray-700">{day.label}</span>
-                  </label>
-                ))}
+              <div className="flex flex-wrap gap-2">
+                {profile?.delivery_days && profile.delivery_days.length > 0 ? (
+                  profile.delivery_days.map(day => (
+                    <span
+                      key={day}
+                      className="px-3 py-2 bg-orange-100 text-orange-700 text-sm font-medium rounded-lg border border-orange-200"
+                    >
+                      {deliveryDayOptions.find(d => d.value === day)?.label || `Día ${day}`}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-red-500 text-sm font-medium">Sin días configurados</span>
+                )}
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                Selecciona los días que prefieres para recibir entregas
+                Los días de entrega son configurados por el administrador. Contactalo si necesitás un cambio.
               </p>
             </div>
 
@@ -303,7 +289,7 @@ export default function ProfilePage() {
           </h3>
           <ul className="text-blue-800 space-y-1 text-sm">
             <li>• Tu email no se puede cambiar desde aquí</li>
-            <li>• Los días de entrega son solo una preferencia, no garantizan disponibilidad</li>
+            <li>• Los días de entrega los configura el administrador</li>
             <li>• Para cambios importantes contacta al administrador</li>
             <li>• Los cambios se guardan inmediatamente</li>
           </ul>

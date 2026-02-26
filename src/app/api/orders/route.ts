@@ -306,11 +306,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Logs para depurar
-    console.log('Authenticated user ID:', user.id);
-    console.log('JWT sub:', session?.user?.id);
-    console.log('JWT token:', session?.access_token);
-    console.log('Cookies:', cookieStore.getAll().map(c => ({ name: c.name, value: c.value })));
+    console.log('POST /api/orders - User:', user.id);
 
     const body = await request.json();
     const orderData: CreateOrderRequest = body;
