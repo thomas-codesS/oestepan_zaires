@@ -239,9 +239,6 @@ export function useCartNotifications() {
 
   const addItemWithNotification = (product: any, quantity: number = 1) => {
     addItem(product, quantity)
-    
-    // Aquí podrías agregar una notificación toast si quieres
-    console.log(`✅ ${product.name} agregado al carrito`)
   }
 
   return { addItemWithNotification }

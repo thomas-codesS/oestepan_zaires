@@ -26,16 +26,11 @@ export async function POST(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // Verificar autenticación
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json(
-        { error: 'No autorizado' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
-    // Verificar que el usuario sea admin
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -49,26 +44,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Preparar datos para inserción
     const productsToInsert = products.map(product => ({
       code: product.code,
       name: product.name,
       description: product.unit,
       price: product.price,
       category: product.category,
-      iva_rate: 21.00, // IVA general del 21%
+      iva_rate: 21.00,
       is_active: true,
-      stock_quantity: 0, // Iniciar con stock 0
+      stock_quantity: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }))
 
-    console.log(`Iniciando inserción de ${productsToInsert.length} productos...`)
-
-    // Insertar en lotes para evitar timeouts
     const batchSize = 50
     const batches = []
-    
+
     for (let i = 0; i < productsToInsert.length; i += batchSize) {
       batches.push(productsToInsert.slice(i, i + batchSize))
     }
@@ -79,24 +70,18 @@ export async function POST(request: NextRequest) {
 
     for (let i = 0; i < batches.length; i++) {
       const batch = batches[i]
-      
-      try {
-        console.log(`Procesando lote ${i + 1}/${batches.length} (${batch.length} productos)...`)
 
+      try {
         const { data, error } = await supabase
           .from('products')
           .insert(batch)
           .select('code, name')
 
         if (error) {
-          console.error(`Error en lote ${i + 1}:`, error.message)
           totalErrors += batch.length
           details.push(`Error en lote ${i + 1}: ${error.message}`)
-          
-          // Si hay error de código duplicado, intentar insertar uno por uno
+
           if (error.message.includes('duplicate') || error.message.includes('unique')) {
-            details.push(`Intentando inserción individual para lote ${i + 1}...`)
-            
             for (const product of batch) {
               try {
                 const { error: individualError } = await supabase
@@ -104,41 +89,27 @@ export async function POST(request: NextRequest) {
                   .insert([product])
 
                 if (individualError) {
-                  if (individualError.message.includes('duplicate') || individualError.message.includes('unique')) {
-                    details.push(`❌ Código ${product.code} ya existe: ${product.name}`)
-                  } else {
-                    details.push(`❌ Error al insertar ${product.code}: ${individualError.message}`)
-                  }
+                  details.push(`Código ${product.code} ya existe o error: ${product.name}`)
                 } else {
                   totalInserted++
-                  details.push(`✅ Insertado: ${product.code} - ${product.name}`)
                 }
-              } catch (err) {
-                details.push(`❌ Error crítico al insertar ${product.code}: ${err}`)
+              } catch {
+                // Continue with next product
               }
-              
-              // Reducir total de errores ya que estamos manejando individualmente
               totalErrors--
             }
           }
         } else {
-          console.log(`✅ Lote ${i + 1} insertado exitosamente (${data.length} productos)`)
           totalInserted += data.length
-          details.push(`✅ Lote ${i + 1}: ${data.length} productos insertados correctamente`)
+          details.push(`Lote ${i + 1}: ${data.length} productos insertados correctamente`)
         }
       } catch (err) {
-        console.error(`Error ejecutando lote ${i + 1}:`, err)
         totalErrors += batch.length
-        details.push(`❌ Error crítico en lote ${i + 1}: ${err}`)
+        details.push(`Error en lote ${i + 1}`)
       }
 
-      // Pequeña pausa entre lotes
       await new Promise(resolve => setTimeout(resolve, 100))
     }
-
-    console.log(`=== RESUMEN ===`)
-    console.log(`✅ Productos insertados: ${totalInserted}`)
-    console.log(`❌ Productos con error: ${totalErrors}`)
 
     return NextResponse.json({
       success: totalInserted,
@@ -150,7 +121,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error en bulk insert:', error)
     return NextResponse.json(
-      { error: `Error interno del servidor: ${error}` },
+      { error: 'Error interno del servidor' },
       { status: 500 }
     )
   }

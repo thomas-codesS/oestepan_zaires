@@ -69,15 +69,6 @@ export default function OrdersPage() {
       }
 
       const data: OrderListResponse = await response.json()
-      console.log('📦 Datos de pedidos recibidos:', data)
-      console.log('📦 Primer pedido completo:', data.orders[0])
-      if (data.orders[0]?.items) {
-        console.log('📦 Items del primer pedido:', data.orders[0].items)
-        console.log('📦 Cantidad de items:', data.orders[0].items.length)
-      } else {
-        console.log('⚠️ El primer pedido NO tiene items o items es undefined')
-        console.log('📦 Estructura del primer pedido:', Object.keys(data.orders[0] || {}))
-      }
       setOrders(data.orders)
       setTotalPages(data.totalPages)
     } catch (err) {

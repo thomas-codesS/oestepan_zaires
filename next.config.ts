@@ -1,14 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  eslint: {
-    // Deshabilitar linting durante el build temporalmente
-    ignoreDuringBuilds: true,
-  },
+  // Enable React strict mode for catching bugs early
+  reactStrictMode: true,
+  // Don't ignore TypeScript/ESLint errors - they catch real bugs
   typescript: {
-    // Deshabilitar errores de TypeScript durante el build temporalmente
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    ignoreDuringBuilds: false,
   },
 };
 

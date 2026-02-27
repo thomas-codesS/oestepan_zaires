@@ -77,21 +77,21 @@ export const UserRoles = {
 } as const
 
 export const DeliveryDays = {
+  SUNDAY: 0,
   MONDAY: 1,
   TUESDAY: 2,
   WEDNESDAY: 3,
   THURSDAY: 4,
   FRIDAY: 5,
   SATURDAY: 6,
-  SUNDAY: 7,
 } as const
 
 export const DeliveryDayLabels = {
+  [DeliveryDays.SUNDAY]: 'Domingo',
   [DeliveryDays.MONDAY]: 'Lunes',
   [DeliveryDays.TUESDAY]: 'Martes',
   [DeliveryDays.WEDNESDAY]: 'Miércoles',
   [DeliveryDays.THURSDAY]: 'Jueves',
   [DeliveryDays.FRIDAY]: 'Viernes',
   [DeliveryDays.SATURDAY]: 'Sábado',
-  [DeliveryDays.SUNDAY]: 'Domingo',
 } as const 

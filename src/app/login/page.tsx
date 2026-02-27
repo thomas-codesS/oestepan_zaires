@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { useAuth } from '@/lib/auth/auth-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { forceLogout, diagnosticSessionInfo } from '@/lib/utils/clear-session'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -28,37 +27,14 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    console.log('🔐 INICIANDO LOGIN desde formulario...')
-    console.log('📧 Email:', formData.email)
-
     try {
-      console.log('📞 Llamando a signIn...')
       await signIn({
         email: formData.email,
         password: formData.password
       })
-      
-      console.log('✅ SignIn completado exitosamente')
-      
-      // Verificar que la sesión se guardó correctamente
-      setTimeout(async () => {
-        console.log('🔍 Verificando sesión después del login...')
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
-        const { data: { session }, error } = await supabase.auth.getSession()
-        
-        if (session) {
-          console.log('✅ Sesión verificada exitosamente:', session.user?.email)
-          // La redirección se maneja automáticamente en el contexto de auth
-        } else {
-          console.error('❌ No se encontró sesión después del login')
-          console.error('❌ Error de sesión:', error)
-          setError('Error: La sesión no se guardó correctamente. Intenta de nuevo.')
-        }
-      }, 1000)
-      
+      // Auth context handles state; redirect via router (no full page reload)
+      router.push('/dashboard')
     } catch (err: any) {
-      console.error('❌ Error en login:', err)
       setError(err.message || 'Error al iniciar sesión')
     } finally {
       setLoading(false)
@@ -132,54 +108,14 @@ export default function LoginPage() {
               </Link>
             </p>
           </div>
-
-          {/* Herramientas de solución de problemas */}
-          <div className="mt-4 sm:mt-6 bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
-            <h3 className="font-semibold text-red-900 mb-2">¿Problemas para iniciar sesión?</h3>
-            <p className="text-red-700 text-sm mb-3">
-              Si tienes problemas con sesiones que no se cierran o no puedes iniciar sesión, usa estas herramientas:
-            </p>
-            <div className="space-y-2">
-              <Button
-                type="button"
-                onClick={() => diagnosticSessionInfo()}
-                variant="outline"
-                className="w-full text-sm border-red-300 text-red-700 hover:bg-red-100"
-              >
-                🔍 Diagnosticar Sesión (ver consola)
-              </Button>
-              <Button
-                type="button"
-                onClick={() => {
-                  if (confirm('¿Estás seguro? Esto limpiará todas las cookies y recargará la página.')) {
-                    forceLogout()
-                  }
-                }}
-                variant="outline"
-                className="w-full text-sm border-red-400 text-red-800 hover:bg-red-100"
-              >
-                🧹 Limpiar Sesión Completamente
-              </Button>
-            </div>
-          </div>
-
-         
         </div>
 
-        <div className="text-center space-y-2">
-          <Link href="/" className="text-orange-600 hover:text-orange-700 block">
+        <div className="text-center">
+          <Link href="/" className="text-orange-600 hover:text-orange-700">
             ← Volver al inicio
           </Link>
-          <div className="flex flex-col space-y-1">
-            <Link href="/debug-login" className="text-purple-600 hover:text-purple-700 block text-sm">
-              🚀 Diagnóstico de Login Paso a Paso
-            </Link>
-            <Link href="/debug-session" className="text-blue-600 hover:text-blue-700 block text-sm">
-              🔧 Debug de Sesión Avanzado
-            </Link>
-          </div>
         </div>
       </div>
     </div>
   )
-} 
+}
