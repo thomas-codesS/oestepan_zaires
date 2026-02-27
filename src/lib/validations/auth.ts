@@ -39,7 +39,7 @@ export const signUpSchema = z.object({
     .trim()
     .optional(),
   delivery_days: z
-    .array(z.number().int().min(1).max(7))
+    .array(z.number().int().min(0).max(6))
     .max(7, 'No se pueden seleccionar más de 7 días')
     .optional(),
 }).refine((data) => data.password === data.confirmPassword, {

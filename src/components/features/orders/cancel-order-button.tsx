@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { cancelOrder, canCancelOrder, getCancelReasonMessage } from '@/lib/services/order-service'
+import { orderService } from '@/lib/services/order-service'
 
 interface CancelOrderButtonProps {
   orderId: string
@@ -12,6 +12,27 @@ interface CancelOrderButtonProps {
   variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
   size?: 'default' | 'sm' | 'lg' | 'icon'
   className?: string
+}
+
+const CANCELLABLE_STATUSES = ['pending']
+
+function canCancelOrder(status: string): boolean {
+  return CANCELLABLE_STATUSES.includes(status)
+}
+
+function getCancelReasonMessage(status: string): string {
+  switch (status) {
+    case 'confirmed':
+    case 'preparing':
+    case 'ready':
+      return 'El pedido ya está en proceso y no se puede cancelar desde aquí'
+    case 'delivered':
+      return 'El pedido ya fue entregado'
+    case 'cancelled':
+      return 'El pedido ya está cancelado'
+    default:
+      return 'No se puede cancelar este pedido'
+  }
 }
 
 export function CancelOrderButton({
@@ -26,7 +47,6 @@ export function CancelOrderButton({
   const [isLoading, setIsLoading] = useState(false)
   const [showConfirmation, setShowConfirmation] = useState(false)
 
-  // Verificar si el pedido se puede cancelar
   const canCancel = canCancelOrder(orderStatus)
 
   const handleCancelClick = () => {
@@ -38,18 +58,10 @@ export function CancelOrderButton({
     setShowConfirmation(false)
 
     try {
-      const result = await cancelOrder(orderId)
-
-      if (result.success) {
-        console.log('✅ Pedido cancelado exitosamente')
-        onSuccess?.()
-      } else {
-        console.error('❌ Error al cancelar:', result.error)
-        onError?.(result.error || 'Error desconocido')
-      }
+      await orderService.cancelOrder(orderId)
+      onSuccess?.()
     } catch (error) {
-      console.error('💥 Error inesperado:', error)
-      onError?.('Error de conexión')
+      onError?.(error instanceof Error ? error.message : 'Error de conexión')
     } finally {
       setIsLoading(false)
     }
@@ -59,7 +71,6 @@ export function CancelOrderButton({
     setShowConfirmation(false)
   }
 
-  // Si no se puede cancelar, mostrar botón deshabilitado con tooltip
   if (!canCancel) {
     return (
       <div className="relative group">
@@ -71,9 +82,8 @@ export function CancelOrderButton({
         >
           No se puede cancelar
         </Button>
-        
-        {/* Tooltip explicativo */}
-        <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 
+
+        <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2
                         bg-gray-800 text-white text-xs rounded px-2 py-1 whitespace-nowrap
                         opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
           {getCancelReasonMessage(orderStatus)}
@@ -84,7 +94,6 @@ export function CancelOrderButton({
 
   return (
     <>
-      {/* Botón principal */}
       <Button
         variant={variant}
         size={size}
@@ -92,17 +101,9 @@ export function CancelOrderButton({
         disabled={isLoading}
         className={className}
       >
-        {isLoading ? (
-          <>
-            <span className="animate-spin mr-2">⏳</span>
-            Cancelando...
-          </>
-        ) : (
-          '🚫 Cancelar Pedido'
-        )}
+        {isLoading ? 'Cancelando...' : 'Cancelar Pedido'}
       </Button>
 
-      {/* Modal de confirmación */}
       {showConfirmation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
@@ -112,9 +113,6 @@ export function CancelOrderButton({
               </h3>
               <p className="text-gray-600">
                 ¿Estás seguro que deseas cancelar este pedido? Esta acción no se puede deshacer.
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                Los productos se devolverán automáticamente al inventario.
               </p>
             </div>
 
@@ -131,14 +129,7 @@ export function CancelOrderButton({
                 onClick={handleConfirmCancel}
                 disabled={isLoading}
               >
-                {isLoading ? (
-                  <>
-                    <span className="animate-spin mr-2">⏳</span>
-                    Cancelando...
-                  </>
-                ) : (
-                  'Sí, cancelar pedido'
-                )}
+                {isLoading ? 'Cancelando...' : 'Sí, cancelar pedido'}
               </Button>
             </div>
           </div>
@@ -146,4 +137,4 @@ export function CancelOrderButton({
       )}
     </>
   )
-} 
+}

@@ -7,46 +7,43 @@ export class ProductService {
 
   async getProducts(filters: ProductFilters = {}): Promise<ProductListResponse> {
     const validatedFilters = productFiltersSchema.parse(filters)
-    const { search, category, is_active, page, limit } = validatedFilters
 
     let query = this.supabase
       .from('products')
       .select('*', { count: 'exact' })
 
-    // Aplicar filtros
-    if (search) {
-      query = query.or(`name.ilike.%${search}%,code.ilike.%${search}%,description.ilike.%${search}%`)
+    if (validatedFilters.search) {
+      query = query.or(`name.ilike.%${validatedFilters.search}%,code.ilike.%${validatedFilters.search}%`)
     }
 
-    if (category) {
-      query = query.eq('category', category)
+    if (validatedFilters.category) {
+      query = query.eq('category', validatedFilters.category)
     }
 
-    if (is_active !== undefined) {
-      query = query.eq('is_active', is_active)
+    if (validatedFilters.is_active !== undefined) {
+      query = query.eq('is_active', validatedFilters.is_active)
     }
 
-    // Paginación
-    const from = (page - 1) * limit
-    const to = from + limit - 1
+    query = query.order('name', { ascending: true })
 
-    const { data, error, count } = await query
-      .order('created_at', { ascending: false })
-      .range(from, to)
+    const offset = ((validatedFilters.page || 1) - 1) * (validatedFilters.limit || 20)
+    const limit = validatedFilters.limit || 20
+
+    const { data, error, count } = await query.range(offset, offset + limit - 1)
 
     if (error) {
-      throw new Error(`Error al obtener productos: ${error.message}`)
+      throw new Error(`Error fetching products: ${error.message}`)
     }
 
     return {
       products: data || [],
       total: count || 0,
-      page,
+      page: validatedFilters.page || 1,
       limit
     }
   }
 
-  async getProductById(id: string): Promise<Product | null> {
+  async getProductById(id: string): Promise<Product> {
     const { data, error } = await this.supabase
       .from('products')
       .select('*')
@@ -55,26 +52,9 @@ export class ProductService {
 
     if (error) {
       if (error.code === 'PGRST116') {
-        return null // Producto no encontrado
+        throw new Error('Producto no encontrado')
       }
-      throw new Error(`Error al obtener producto: ${error.message}`)
-    }
-
-    return data
-  }
-
-  async getProductByCode(code: string): Promise<Product | null> {
-    const { data, error } = await this.supabase
-      .from('products')
-      .select('*')
-      .eq('code', code)
-      .single()
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null // Producto no encontrado
-      }
-      throw new Error(`Error al obtener producto por código: ${error.message}`)
+      throw new Error(`Error fetching product: ${error.message}`)
     }
 
     return data
@@ -83,9 +63,14 @@ export class ProductService {
   async createProduct(productData: CreateProductRequest): Promise<Product> {
     const validatedData = createProductSchema.parse(productData)
 
-    // Verificar que el código no exista
-    const existingProduct = await this.getProductByCode(validatedData.code)
-    if (existingProduct) {
+    // Check if code already exists
+    const { data: existing } = await this.supabase
+      .from('products')
+      .select('id')
+      .eq('code', validatedData.code)
+      .single()
+
+    if (existing) {
       throw new Error(`Ya existe un producto con el código: ${validatedData.code}`)
     }
 
@@ -101,22 +86,14 @@ export class ProductService {
       .single()
 
     if (error) {
-      throw new Error(`Error al crear producto: ${error.message}`)
+      throw new Error(`Error creating product: ${error.message}`)
     }
 
     return data
   }
 
-  async updateProduct(id: string, productData: Partial<UpdateProductRequest>): Promise<Product> {
+  async updateProduct(id: string, productData: Partial<CreateProductRequest> & { is_active?: boolean }): Promise<Product> {
     const validatedData = updateProductSchema.parse({ ...productData, id })
-
-    // Si se está actualizando el código, verificar que no exista
-    if (validatedData.code) {
-      const existingProduct = await this.getProductByCode(validatedData.code)
-      if (existingProduct && existingProduct.id !== id) {
-        throw new Error(`Ya existe un producto con el código: ${validatedData.code}`)
-      }
-    }
 
     const { data, error } = await this.supabase
       .from('products')
@@ -129,7 +106,7 @@ export class ProductService {
       .single()
 
     if (error) {
-      throw new Error(`Error al actualizar producto: ${error.message}`)
+      throw new Error(`Error updating product: ${error.message}`)
     }
 
     return data
@@ -142,46 +119,15 @@ export class ProductService {
       .eq('id', id)
 
     if (error) {
-      throw new Error(`Error al eliminar producto: ${error.message}`)
+      throw new Error(`Error deleting product: ${error.message}`)
     }
   }
 
   async toggleProductStatus(id: string): Promise<Product> {
     const product = await this.getProductById(id)
-    if (!product) {
-      throw new Error('Producto no encontrado')
-    }
 
     return this.updateProduct(id, { is_active: !product.is_active })
   }
-
-  async getCategories(): Promise<string[]> {
-    const { data, error } = await this.supabase
-      .from('products')
-      .select('category')
-      .not('category', 'is', null)
-
-    if (error) {
-      throw new Error(`Error al obtener categorías: ${error.message}`)
-    }
-
-    const categories = [...new Set(data?.map(item => item.category).filter(Boolean))]
-    return categories.sort()
-  }
-
-  // Método para calcular precio con IVA
-  calculatePriceWithIVA(price: number, ivaRate: number): number {
-    return price * (1 + ivaRate / 100)
-  }
-
-  // Método para formatear precio en pesos argentinos
-  formatPrice(price: number): string {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS'
-    }).format(price)
-  }
 }
 
-// Instancia singleton del servicio
-export const productService = new ProductService() 
+export const productService = new ProductService()

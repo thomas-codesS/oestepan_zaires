@@ -66,8 +66,8 @@ export default function CheckoutPage() {
     setError(null)
 
     try {
-      if (!user?.access_token) {
-        throw new Error('No se pudo obtener el token de autenticación. Por favor, inicia sesión nuevamente.')
+      if (!user) {
+        throw new Error('No se pudo obtener el usuario. Por favor, inicia sesión nuevamente.')
       }
 
       if (!deliveryWindow.isOpen || !deliveryDateForApi) {
@@ -94,8 +94,6 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${user.access_token}`,
-          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
         },
         credentials: 'include',
         body: JSON.stringify(orderData),

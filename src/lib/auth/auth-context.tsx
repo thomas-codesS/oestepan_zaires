@@ -1,221 +1,22 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { AuthUser, SignInCredentials, SignUpCredentials, UpdateProfileData, UserProfile, AuthContextType } from '@/lib/types/auth'
 
-const supabase = createClient()
+const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export const authService = {
-  async getCurrentUser(): Promise<AuthUser | null> {
-    try {
-      console.log('🔍 Obteniendo sesión actual...')
-      
-      // Timeout para evitar que se quede colgado
-      const sessionPromise = supabase.auth.getSession()
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Timeout getting session')), 10000)
-      })
-      
-      const { data: { session }, error } = await Promise.race([sessionPromise, timeoutPromise]) as any
-      
-      if (error) {
-        console.error('❌ Error obteniendo sesión:', error.message)
-        return null
-      }
-      
-      if (!session || !session.user) {
-        console.log('ℹ️ No hay sesión activa')
-        return null
-      }
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [initialized, setInitialized] = useState<boolean>(false)
 
-      console.log('✅ Sesión encontrada para:', session.user.email)
+  // Create supabase client once via ref to avoid re-creating on each render
+  const supabaseRef = React.useRef(createClient())
+  const supabase = supabaseRef.current
 
-      let profile = null;
-      try {
-        console.log('📊 Obteniendo perfil...')
-        const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single()
-        profile = data;
-        console.log('✅ Perfil obtenido:', profile?.role)
-      } catch (profileError) {
-        console.error('❌ Error fetching profile in getCurrentUser:', profileError);
-        return null;
-      }
-
-      return {
-        id: session.user.id,
-        email: session.user.email || '',
-        access_token: session.access_token,
-        profile
-      }
-    } catch (error) {
-      console.error('❌ Error general en getCurrentUser:', error)
-      return null
-    }
-  },
-
-  onAuthStateChange(callback: (authUser: AuthUser | null) => void) {
-    return supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!session?.user) {
-        callback(null)
-        return
-      }
-
-      let profile = null;
-      try {
-        const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single()
-        profile = data;
-      } catch (profileError) {
-        console.error('Error fetching profile in onAuthStateChange:', profileError);
-        callback(null);
-        return;
-      }
-
-      callback({
-        id: session.user.id,
-        email: session.user.email || '',
-        access_token: session.access_token,
-        profile
-      })
-    })
-  },
-
-  async signIn(credentials: SignInCredentials): Promise<AuthUser> {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: credentials.email,
-      password: credentials.password
-    })
-
-    if (error) throw new Error(error.message)
-    if (!data.user || !data.session) throw new Error('No user or session returned after sign in')
-
-    let profile = null;
-    try {
-      const { data: profileData } = await supabase.from('profiles').select('*').eq('id', data.user.id).single()
-      profile = profileData;
-    } catch (profileError) {
-      console.error('Error fetching profile in signIn:', profileError);
-      throw new Error('Failed to fetch user profile');
-    }
-
-    return {
-      id: data.user.id,
-      email: data.user.email || '',
-      access_token: data.session.access_token,
-      profile
-    }
-  },
-
-  async signUp(credentials: SignUpCredentials): Promise<AuthUser> {
-    const { data, error } = await supabase.auth.signUp({
-      email: credentials.email,
-      password: credentials.password,
-      options: {
-        data: {
-          full_name: credentials.full_name,
-          company_name: credentials.company_name,
-          role: 'cliente'
-        },
-        // Nota: emailRedirectTo solo funciona si está habilitada la confirmación de email
-        emailRedirectTo: `${window.location.origin}/auth/callback`
-      }
-    })
-
-    if (error) {
-      throw new Error(error.message)
-    }
-
-    if (!data.user) {
-      throw new Error('No se pudo crear el usuario')
-    }
-
-    // Si no hay sesión, significa que requiere confirmación de email
-    if (!data.session) {
-      throw new Error('CONFIRM_EMAIL_REQUIRED')
-    }
-
-    // Si hay sesión, el usuario fue confirmado automáticamente
-    let profile = null;
-    try {
-      // Intentar obtener el perfil, con reintentos
-      const maxRetries = 3;
-      for (let i = 0; i < maxRetries; i++) {
-        await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)));
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single()
-        
-        if (profileData) {
-          profile = profileData;
-          break;
-        }
-        
-        if (i === maxRetries - 1 && !profileData) {
-          console.error('Error fetching profile in signUp:', profileError);
-          throw new Error('No se pudo crear el perfil de usuario. Por favor, contacta al administrador.');
-        }
-      }
-    } catch (profileError) {
-      console.error('Error fetching profile in signUp:', profileError);
-      throw new Error('No se pudo crear el perfil de usuario. Por favor, contacta al administrador.');
-    }
-
-    return {
-      id: data.user.id,
-      email: data.user.email || '',
-      access_token: data.session.access_token,
-      profile
-    }
-  },
-
-  async signOut(): Promise<void> {
-    const { error } = await supabase.auth.signOut()
-    if (error) {
-      throw new Error(error.message)
-    }
-    
-    // Limpiar datos locales adicionales para asegurar logout completo
-    if (typeof window !== 'undefined') {
-      // Limpiar cualquier token residual en localStorage
-      const keysToRemove = []
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i)
-        if (key && (key.includes('supabase') || key.includes('sb-') || key.includes('auth'))) {
-          keysToRemove.push(key)
-        }
-      }
-      keysToRemove.forEach(key => localStorage.removeItem(key))
-      
-      // Limpiar sessionStorage también
-      const sessionKeysToRemove = []
-      for (let i = 0; i < sessionStorage.length; i++) {
-        const key = sessionStorage.key(i)
-        if (key && (key.includes('supabase') || key.includes('sb-') || key.includes('auth'))) {
-          sessionKeysToRemove.push(key)
-        }
-      }
-      sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key))
-    }
-  },
-
-  async updateProfile(userId: string, data: UpdateProfileData): Promise<UserProfile> {
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .update(data)
-      .eq('id', userId)
-      .select()
-      .single()
-
-    if (error) {
-      throw new Error(error.message)
-    }
-
-    return profile
-  },
-
-  async getUserProfile(userId: string): Promise<UserProfile> {
+  const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -223,232 +24,200 @@ export const authService = {
       .single()
 
     if (error) {
-      throw new Error(error.message)
+      console.error('Error fetching profile:', error.message)
+      return null
     }
-
     return data
-  },
+  }, [supabase])
 
-  isAdmin(profile: UserProfile | null): boolean {
-    return profile?.role === 'admin'
-  },
-
-  isClient(profile: UserProfile | null): boolean {
-    return profile?.role === 'cliente'
-  }
-}
-
-// Contexto de autenticación
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
-
-// Proveedor de autenticación
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null)
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const [initialized, setInitialized] = useState<boolean>(false)
-
-  // Inicializar usuario actual y suscribirse a cambios de sesión
   useEffect(() => {
-    let subscription: { unsubscribe: () => void } | null = null
+    let mounted = true
 
     const init = async () => {
-      setLoading(true)
-      console.log('🔄 Inicializando contexto de autenticación...')
-      
       try {
-        const current = await authService.getCurrentUser()
-        if (current) {
-          console.log('✅ Usuario encontrado:', current.email)
-          
-          // Verificación adicional: verificar que Supabase también reconoce la sesión
-          try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session || !session.user) {
-              console.warn('⚠️ DESCONEXIÓN DETECTADA: El contexto tiene usuario pero Supabase no tiene sesión')
-              console.log('🧹 Limpiando estado inconsistente...')
-              
-              // Limpiar localStorage corrupto
-              const { clearLocalStorage } = await import('@/lib/utils/clear-session')
-              clearLocalStorage()
-              
-              // Limpiar estado
-              setUser(null)
-              setProfile(null)
-              return
-            }
-            
-            // Verificar que el usuario es el mismo
-            if (session.user.email !== current.email) {
-              console.warn('⚠️ USUARIO DIFERENTE: Contexto y Supabase tienen usuarios diferentes')
-              console.log('🧹 Limpiando estado inconsistente...')
-              
-              const { clearLocalStorage } = await import('@/lib/utils/clear-session')
-              clearLocalStorage()
-              
-              setUser(null)
-              setProfile(null)
-              return
-            }
-          } catch (verificationError) {
-            console.error('❌ Error verificando sesión:', verificationError)
-            console.log('🧹 Limpiando por error de verificación...')
-            
-            const { clearLocalStorage } = await import('@/lib/utils/clear-session')
-            clearLocalStorage()
-            
+        // Use getUser() which validates the JWT server-side (more secure than getSession)
+        const { data: { user: authUser }, error } = await supabase.auth.getUser()
+
+        if (error || !authUser) {
+          if (mounted) {
             setUser(null)
             setProfile(null)
-            return
           }
-          
-          setUser(current)
-          setProfile(current.profile ?? null)
-        } else {
-          console.log('ℹ️ No hay usuario activo')
+          return
+        }
+
+        const userProfile = await fetchProfile(authUser.id)
+
+        if (mounted) {
+          setUser({
+            id: authUser.id,
+            email: authUser.email || '',
+            profile: userProfile
+          })
+          setProfile(userProfile)
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error)
+        if (mounted) {
           setUser(null)
           setProfile(null)
         }
-      } catch (error) {
-        console.error('❌ Error al obtener usuario actual:', error)
-        // En caso de error, limpiar estado y continuar
-        setUser(null)
-        setProfile(null)
-        
-        // Si hay un error de sesión corrupta, limpiar localStorage
-        if (error instanceof Error && error.message.includes('session')) {
-          console.log('🧹 Limpiando sesión corrupta...')
-          if (typeof window !== 'undefined') {
-            const { clearLocalStorage } = await import('@/lib/utils/clear-session')
-            clearLocalStorage()
-          }
+      } finally {
+        if (mounted) {
+          setLoading(false)
+          setInitialized(true)
         }
-      }
-      
-      setLoading(false)
-      setInitialized(true)
-
-      // Escuchar cambios de sesión
-      const sub = authService.onAuthStateChange((authUser) => {
-        setUser(authUser)
-        setProfile(authUser?.profile ?? null)
-      }) as any
-
-      // Supabase v2 devuelve { data: { subscription } }
-      if (sub?.data?.subscription) {
-        subscription = sub.data.subscription
-      } else if (sub?.unsubscribe) {
-        subscription = sub
       }
     }
 
     init()
 
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!mounted) return
+
+      if (event === 'SIGNED_OUT' || !session?.user) {
+        setUser(null)
+        setProfile(null)
+        return
+      }
+
+      const userProfile = await fetchProfile(session.user.id)
+
+      if (mounted) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email || '',
+          profile: userProfile
+        })
+        setProfile(userProfile)
+      }
+    })
+
     return () => {
-      subscription?.unsubscribe?.()
+      mounted = false
+      subscription.unsubscribe()
     }
-  }, [])
+  }, [supabase, fetchProfile])
 
-  // Métodos de autenticación
-  const signIn = async (credentials: SignInCredentials) => {
-    console.log('🔐 Iniciando proceso de login...')
+  const signIn = useCallback(async (credentials: SignInCredentials) => {
     setLoading(true)
-    
     try {
-      // Timeout para evitar que se quede colgado
-      const loginPromise = authService.signIn(credentials)
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Login timeout - el proceso tardó demasiado')), 15000)
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: credentials.email,
+        password: credentials.password
       })
-      
-      const logged = await Promise.race([loginPromise, timeoutPromise]) as any
-      
-      console.log('✅ Login exitoso para:', logged.email)
-      setUser(logged)
-      setProfile(logged.profile ?? null)
-      
-      // Forzar redirección inmediata después del login exitoso
-      // Esto evita el problema de necesitar refrescar la página
-      console.log('🔄 Redirigiendo al dashboard...')
-      if (typeof window !== 'undefined') {
-        window.location.href = '/dashboard'
+
+      if (error) throw new Error(error.message)
+      if (!data.user || !data.session) throw new Error('No se pudo iniciar sesión')
+
+      const userProfile = await fetchProfile(data.user.id)
+
+      const authUser: AuthUser = {
+        id: data.user.id,
+        email: data.user.email || '',
+        profile: userProfile
       }
-      
+
+      setUser(authUser)
+      setProfile(userProfile)
     } catch (error) {
-      console.error('❌ Error en signIn:', error)
-      // Limpiar estado en caso de error
       setUser(null)
       setProfile(null)
       throw error
     } finally {
       setLoading(false)
-      console.log('🏁 Proceso de login terminado')
     }
-  }
+  }, [supabase, fetchProfile])
 
-  const signUp = async (credentials: SignUpCredentials) => {
+  const signUp = useCallback(async (credentials: SignUpCredentials) => {
     setLoading(true)
     try {
-      const registered = await authService.signUp(credentials)
-      setUser(registered)
-      setProfile(registered.profile ?? null)
-      
-      // Redirigir al dashboard después del registro exitoso
-      if (typeof window !== 'undefined') {
-        window.location.href = '/dashboard'
+      const { data, error } = await supabase.auth.signUp({
+        email: credentials.email,
+        password: credentials.password,
+        options: {
+          data: {
+            full_name: credentials.full_name,
+            company_name: credentials.company_name,
+            role: 'cliente'
+          },
+          emailRedirectTo: typeof window !== 'undefined'
+            ? `${window.location.origin}/auth/callback`
+            : undefined
+        }
+      })
+
+      if (error) throw new Error(error.message)
+      if (!data.user) throw new Error('No se pudo crear el usuario')
+
+      // If no session, email confirmation is required
+      if (!data.session) {
+        throw new Error('CONFIRM_EMAIL_REQUIRED')
       }
+
+      // Wait for the trigger to create the profile
+      let userProfile: UserProfile | null = null
+      for (let i = 0; i < 3; i++) {
+        await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)))
+        userProfile = await fetchProfile(data.user.id)
+        if (userProfile) break
+      }
+
+      const authUser: AuthUser = {
+        id: data.user.id,
+        email: data.user.email || '',
+        profile: userProfile
+      }
+
+      setUser(authUser)
+      setProfile(userProfile)
     } catch (error) {
       throw error
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, fetchProfile])
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     setLoading(true)
     try {
-      await authService.signOut()
-      
-      // Limpiar estado local inmediatamente
-      setUser(null)
-      setProfile(null)
-      
-      // Forzar redirección inmediata al home
-      if (typeof window !== 'undefined') {
-        window.location.href = '/'
-      }
+      await supabase.auth.signOut()
     } catch (error) {
       console.error('Error during signOut:', error)
-      // En caso de error, aún así limpiar el estado local
+    } finally {
       setUser(null)
       setProfile(null)
-      
-      // Usar forzado de limpieza si hay error
-      if (typeof window !== 'undefined') {
-        const { forceLogout } = await import('@/lib/utils/clear-session')
-        forceLogout()
-      }
+      setLoading(false)
+    }
+  }, [supabase])
+
+  const updateProfile = useCallback(async (data: UpdateProfileData) => {
+    if (!user) return
+    setLoading(true)
+    try {
+      const { data: updated, error } = await supabase
+        .from('profiles')
+        .update(data)
+        .eq('id', user.id)
+        .select()
+        .single()
+
+      if (error) throw new Error(error.message)
+      setProfile(updated)
     } finally {
       setLoading(false)
     }
-  }
+  }, [user, supabase])
 
-  const updateProfile = async (data: UpdateProfileData) => {
+  const refreshProfile = useCallback(async () => {
     if (!user) return
-    setLoading(true)
-    const updated = await authService.updateProfile(user.id, data)
-    setProfile(updated)
-    setLoading(false)
-  }
+    const refreshed = await fetchProfile(user.id)
+    if (refreshed) setProfile(refreshed)
+  }, [user, fetchProfile])
 
-  const refreshProfile = async () => {
-    if (!user) return
-    const refreshed = await authService.getUserProfile(user.id)
-    setProfile(refreshed)
-  }
-
-  const isAdmin = () => authService.isAdmin(profile)
-  const isClient = () => authService.isClient(profile)
+  const isAdmin = useCallback(() => profile?.role === 'admin', [profile])
+  const isClient = useCallback(() => profile?.role === 'cliente', [profile])
 
   const value: AuthContextType = {
     user,
@@ -467,7 +236,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-// Hook de conveniencia
 export function useAuth() {
   const context = useContext(AuthContext)
   if (!context) {

@@ -13,45 +13,29 @@ export default function AuthCallbackPage() {
     const handleCallback = async () => {
       try {
         const supabase = createClient()
-        
-        // Obtener el hash de la URL para manejar el token de confirmación
+
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
         const type = hashParams.get('type')
 
-        console.log('🔐 Callback de autenticación:', { type, hasAccessToken: !!accessToken })
-
         if (type === 'signup' && accessToken && refreshToken) {
-          // Establecer la sesión con los tokens recibidos
           const { error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken
           })
 
           if (sessionError) {
-            console.error('Error al establecer sesión:', sessionError)
             setError('Error al confirmar tu cuenta. Por favor, intenta de nuevo.')
             setLoading(false)
             return
           }
 
-          console.log('✅ Email confirmado exitosamente')
-          
-          // Redirigir al dashboard después de un breve delay
-          setTimeout(() => {
-            window.location.href = '/dashboard'
-          }, 1000)
+          router.push('/dashboard')
         } else if (type === 'recovery') {
-          // Manejar recuperación de contraseña
-          console.log('🔑 Proceso de recuperación de contraseña')
           router.push('/reset-password')
         } else {
-          // Si no hay parámetros válidos, redirigir al login
-          console.log('⚠️ No se encontraron parámetros válidos')
-          setTimeout(() => {
-            router.push('/login')
-          }, 2000)
+          router.push('/login')
         }
       } catch (err) {
         console.error('Error en callback:', err)
@@ -101,4 +85,3 @@ export default function AuthCallbackPage() {
     </div>
   )
 }
-
