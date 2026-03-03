@@ -83,15 +83,15 @@ export const DeliveryDays = {
   THURSDAY: 4,
   FRIDAY: 5,
   SATURDAY: 6,
-  SUNDAY: 7,
+  SUNDAY: 0,
 } as const
 
 export const DeliveryDayLabels = {
+  [DeliveryDays.SUNDAY]: 'Domingo',
   [DeliveryDays.MONDAY]: 'Lunes',
   [DeliveryDays.TUESDAY]: 'Martes',
   [DeliveryDays.WEDNESDAY]: 'Miércoles',
   [DeliveryDays.THURSDAY]: 'Jueves',
   [DeliveryDays.FRIDAY]: 'Viernes',
   [DeliveryDays.SATURDAY]: 'Sábado',
-  [DeliveryDays.SUNDAY]: 'Domingo',
 } as const 

@@ -296,8 +296,6 @@ export async function POST(request: NextRequest) {
     // Verificar autenticación
     // Obtener usuario autenticado
     const { data: { user }, error: authError } = await supabase.auth.getUser();
-    // Obtener la sesión para acceder a detalles del token cuando sea necesario
-    const { data: { session } } = await supabase.auth.getSession();
     if (authError || !user) {
       console.error('Auth error:', authError);
       return NextResponse.json(
@@ -306,11 +304,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Logs para depurar
+    // Log seguro (sin datos sensibles)
     console.log('Authenticated user ID:', user.id);
-    console.log('JWT sub:', session?.user?.id);
-    console.log('JWT token:', session?.access_token);
-    console.log('Cookies:', cookieStore.getAll().map(c => ({ name: c.name, value: c.value })));
 
     const body = await request.json();
     const orderData: CreateOrderRequest = body;

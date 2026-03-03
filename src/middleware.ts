@@ -73,10 +73,10 @@ export async function middleware(request: NextRequest) {
     '/diagnostico-auth', // Página de diagnóstico de autenticación
   ];
 
-  const authRoutes = ['/login', '/register', '/auth/forgot-password'];
-  const protectedRoutes = ['/dashboard', '/profile', '/orders', '/admin'];
+  const authRoutes = ['/login', '/register', '/forgot-password'];
+  const protectedRoutes = ['/dashboard', '/profile', '/orders', '/admin', '/checkout'];
   const adminRoutes = ['/admin'];
-  const clientRoutes = ['/orders', '/cart'];
+  const clientRoutes = ['/orders', '/cart', '/checkout'];
 
   const isPublicRoute = publicRoutes.some(route => 
     pathname === route || 

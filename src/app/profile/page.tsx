@@ -83,7 +83,7 @@ export default function ProfilePage() {
     { value: 4, label: 'Jueves' },
     { value: 5, label: 'Viernes' },
     { value: 6, label: 'Sábado' },
-    { value: 7, label: 'Domingo' }
+    { value: 0, label: 'Domingo' }
   ]
 
   // Mostrar loading mientras se autentica
